@@ -15,16 +15,16 @@
 <body>
 
   <h1>WS Class - Test Toàn Bộ Chức Năng</h1>
-  <p><strong>Server yêu cầu:</strong> WebSocket echo server hỗ trợ <code>wss://echo.websocket.org</code> hoặc local (ví dụ: Node.js echo server)</p>
+  <p><strong>Server test:</strong> Dùng <code>wss://echo.websocket.org</code> (trả về nguyên bản dữ liệu)</p>
 
   <div class="section">
     <h3>Kết nối</h3>
     <input type="text" id="url" placeholder="URL (để trống = auto)" value="wss://echo.websocket.org" />
-    <button onclick="init()">Khởi tạo & Kết nối</button>
-    <button onclick="ws?.connect()">Connect thủ công</button>
-    <button onclick="ws?.disconnect()">Disconnect</button>
-    <button onclick="ws?.reconnect()">Reconnect</button>
-    <button onclick="ws?.autoconnect(1000, 3)">Autoconnect (1s, 3 lần)</button>
+    <button onclick="init()">Khởi tạo WS</button>
+    <button onclick="connect()">Connect</button>
+    <button onclick="disconnect()">Disconnect</button>
+    <button onclick="reconnect()">Reconnect</button>
+    <button onclick="autoconnect()">Autoconnect (3s, 5 lần)</button>
   </div>
 
   <div class="section">
@@ -56,61 +56,60 @@
       div.scrollTop = div.scrollHeight;
     }
 
+    // === KHỞI TẠO ===
     window.init = () => {
       const url = document.getElementById('url').value.trim();
       try {
         ws = WS.get(url);
         setupEvents();
-        ws.connect();
-        log('Đang kết nối...');
+        log('WS instance tạo thành công. Dùng nút Connect để kết nối.');
       } catch (e) {
         log('Lỗi khởi tạo: ' + e.message);
       }
     };
 
+    // === CÁC HÀM ĐIỀU KHIỂN ===
+    window.connect = () => {
+      if (!ws) return log('Chưa khởi tạo WS. Click "Khởi tạo WS" trước.');
+      try { ws.connect(); log('Đang connect...'); } catch (e) { log('Connect lỗi: ' + e.message); }
+    };
+
+    window.disconnect = () => {
+      if (!ws) return log('Không có kết nối.');
+      try { ws.disconnect(); log('Đã ngắt kết nối thủ công.'); } catch (e) { log('Disconnect lỗi: ' + e.message); }
+    };
+
+    window.reconnect = () => {
+      if (!ws) return log('Chưa khởi tạo WS.');
+      try { ws.reconnect(); log('Đang reconnect...'); } catch (e) { log('Reconnect lỗi: ' + e.message); }
+    };
+
+    window.autoconnect = () => {
+      if (!ws) return log('Chưa khởi tạo WS.');
+      try { ws.autoconnect(3000, 5); log('Bật autoconnect: 3s, 5 lần.'); } catch (e) { log('Autoconnect lỗi: ' + e.message); }
+    };
+
+    // === SỰ KIỆN ===
     function setupEvents() {
       ws.on('open', () => log('OPEN: Kết nối thành công!'));
-      ws.on('close', () => log('CLOSE: Ngắt kết nối.'));
-      ws.on('error', e => log('ERROR: ' + (e.message || 'Lỗi không xác định')));
+      ws.on('close', () => log('CLOSE: Đã ngắt kết nối.'));
+      ws.on('error', e => log('ERROR: ' + (e.message || 'Lỗi kết nối')));
       ws.on('message', data => {
         if (data instanceof ArrayBuffer) {
+          const len = data.byteLength;
           const view = new Uint8Array(data);
-          log(`RECEIVE BINARY [${data.byteLength} bytes]: [${Array.from(view.slice(0, 20)).join(', ')}${view.length > 20 ? '...' : ''}]`);
+          const preview = len > 20 ? Array.from(view.slice(0, 20)).join(', ') + '...' : Array.from(view).join(', ');
+          log(`RECEIVE BINARY [${len} bytes]: [${preview}]`);
         } else {
           log(`RECEIVE: ${JSON.stringify(data)}`);
         }
       });
     }
 
-    // === GỬI TẤT CẢ KIỂU DỮ LIỆU ===
-    window.sendString = () => sendSafe(() => ws.send("Xin chào từ String! 👋"));
-    window.sendNumber = () => sendSafe(() => ws.send(12345));
-    window.sendArray = () => sendSafe(() => ws.send([1, "hi", true, null]));
-    window.sendObject = () => sendSafe(() => ws.send({ action: "ping", time: Date.now(), rand: Math.random() }));
-
-    window.sendUint8 = () => {
-      const arr = new Uint8Array([0, 1, 2, 255, 100, 200]);
-      sendSafe(() => ws.sendBytes(arr), `SEND Uint8Array: [${Array.from(arr).join(', ')}]`);
-    };
-
-    window.sendFloat32 = () => {
-      const arr = new Float32Array([1.5, -2.3, Math.PI, 0.0001]);
-      sendSafe(() => ws.sendBytes(arr), `SEND Float32Array: [${Array.from(arr).map(v => v.toFixed(4)).join(', ')}]`);
-    };
-
-    window.sendMixed = () => {
-      const buffer = new ArrayBuffer(16);
-      const view = new DataView(buffer);
-      view.setUint8(0, 255);           // byte
-      view.setInt16(1, -1234, true);   // little-endian int16
-      view.setFloat32(4, 3.14159);     // float
-      view.setBigUint64(8, 9007199254740992n); // bigint
-      sendSafe(() => ws.sendBytes(buffer), 'SEND Mixed Binary (16 bytes)');
-    };
-
+    // === GỬI DỮ LIỆU ===
     function sendSafe(fn, preview = null) {
+      if (!ws) return log('Chưa khởi tạo WS.');
       try {
-        if (!ws || ws.sendBytes === undefined) throw new Error("WS chưa khởi tạo");
         if (preview) log(preview);
         fn();
       } catch (e) {
@@ -118,10 +117,30 @@
       }
     }
 
-    // Test auto nếu không có URL
-    if (!document.getElementById('url').value) {
-      log('Tip: Để trống URL → tự động dùng ws:// hoặc wss:// + host hiện tại');
-    }
+    window.sendString = () => sendSafe(() => ws.send("Xin chào từ String!"), 'SEND: String');
+    window.sendNumber = () => sendSafe(() => ws.send(98765), 'SEND: Number');
+    window.sendArray = () => sendSafe(() => ws.send([1, "abc", true, null]), 'SEND: Array');
+    window.sendObject = () => sendSafe(() => ws.send({ type: "test", ts: Date.now(), rand: Math.random() }), 'SEND: Object');
+
+    window.sendUint8 = () => {
+      const arr = new Uint8Array([0, 1, 255, 100, 200, 50]);
+      sendSafe(() => ws.sendBytes(arr), `SEND Uint8Array: [${Array.from(arr).join(', ')}]`);
+    };
+
+    window.sendFloat32 = () => {
+      const arr = new Float32Array([1.234, -5.678, Math.PI, 0.001]);
+      sendSafe(() => ws.sendBytes(arr), `SEND Float32Array: [${Array.from(arr).map(v => v.toFixed(4)).join(', ')}]`);
+    };
+
+    window.sendMixed = () => {
+      const buffer = new ArrayBuffer(16);
+      const view = new DataView(buffer);
+      view.setUint8(0, 255);
+      view.setInt16(1, -1234, true);
+      view.setFloat32(4, 3.14159);
+      view.setBigUint64(8, 9007199254740992n);
+      sendSafe(() => ws.sendBytes(buffer), 'SEND Mixed Binary (16 bytes): [255, int16(-1234), float(3.14159), bigint(9007...)]');
+    };
   </script>
 
 </body>
