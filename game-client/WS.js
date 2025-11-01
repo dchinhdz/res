@@ -96,11 +96,13 @@ export class WS {
   }
 
   sendBytes(data) {
-    if (!this.#ws || this.#ws.readyState !== WebSocket.OPEN)
-      throw new Error("WebSocket not open");
-    if (!(data instanceof ArrayBuffer) && !ArrayBuffer.isView(data))
-      throw new TypeError("sendBytes() requires ArrayBuffer or TypedArray");
-    const buf = data.buffer === data ? data : data.buffer;
-    this.#ws.send(buf.slice(data.byteOffset, data.byteOffset + data.byteLength));
+  if (!this.#ws || this.#ws.readyState !== WebSocket.OPEN)
+    throw new Error("WebSocket not open");
+  if (!(data instanceof ArrayBuffer) && !ArrayBuffer.isView(data))
+    throw new TypeError("sendBytes() requires ArrayBuffer or TypedArray");
+  const buf = data instanceof ArrayBuffer ? data : data.buffer;
+  const start = data instanceof ArrayBuffer ? 0 : data.byteOffset;
+  const end = start + (data instanceof ArrayBuffer ? data.byteLength : data.byteLength);
+  this.#ws.send(buf.slice(start, end));
   }
 }
