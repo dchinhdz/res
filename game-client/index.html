@@ -3,24 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>WS Class Test - Full Data Types</title>
+  <title>WS Class Test - Final Fixed</title>
   <style>
     body { font-family: system-ui; margin: 20px; line-height: 1.6; }
     .log { background:#f5f5f5; padding:10px; border-radius:8px; height:400px; overflow:auto; font-family: monospace; font-size:13px; }
     button { margin:5px; padding:8px 12px; }
     .section { margin:20px 0; padding:15px; border:1px solid #ddd; border-radius:8px; }
-    input, textarea { width:100%; padding:8px; margin:5px 0; }
+    input { width:100%; padding:8px; margin:5px 0; }
   </style>
 </head>
 <body>
 
-  <h1>WS Class - Test Toàn Bộ Chức Năng</h1>
-  <p><strong>Server test:</strong> Dùng <code>wss://echo.websocket.org</code> (trả về nguyên bản dữ liệu)</p>
+  <h1>WS Class - ĐÃ FIX HOÀN TOÀN</h1>
+  <p>Chỉ 1 phiên kết nối duy nhất. Connect/Disconnect/Autoconnect có điều kiện rõ ràng.</p>
 
   <div class="section">
     <h3>Kết nối</h3>
     <input type="text" id="url" placeholder="URL (để trống = auto)" value="wss://echo.websocket.org" />
-    <button onclick="init()">Khởi tạo WS</button>
+    <button onclick="init()">Khởi tạo WS (1 lần duy nhất)</button>
     <button onclick="connect()">Connect</button>
     <button onclick="disconnect()">Disconnect</button>
     <button onclick="reconnect()">Reconnect</button>
@@ -28,7 +28,7 @@
   </div>
 
   <div class="section">
-    <h3>Gửi Dữ Liệu (Tất cả kiểu)</h3>
+    <h3>Gửi Dữ Liệu</h3>
     <button onclick="sendString()">String</button>
     <button onclick="sendNumber()">Number</button>
     <button onclick="sendArray()">Array</button>
@@ -56,57 +56,54 @@
       div.scrollTop = div.scrollHeight;
     }
 
-    // === KHỞI TẠO ===
     window.init = () => {
+      if (ws) return log('ĐÃ khởi tạo rồi! Chỉ 1 lần duy nhất.');
       const url = document.getElementById('url').value.trim();
       try {
         ws = WS.get(url);
         setupEvents();
-        log('WS instance tạo thành công. Dùng nút Connect để kết nối.');
+        log('WS instance tạo thành công. Dùng Connect để kết nối.');
       } catch (e) {
         log('Lỗi khởi tạo: ' + e.message);
       }
     };
 
-    // === CÁC HÀM ĐIỀU KHIỂN ===
     window.connect = () => {
-      if (!ws) return log('Chưa khởi tạo WS. Click "Khởi tạo WS" trước.');
-      try { ws.connect(); log('Đang connect...'); } catch (e) { log('Connect lỗi: ' + e.message); }
+      if (!ws) return log('Chưa khởi tạo WS.');
+      ws.connect();
     };
 
     window.disconnect = () => {
-      if (!ws) return log('Không có kết nối.');
-      try { ws.disconnect(); log('Đã ngắt kết nối thủ công.'); } catch (e) { log('Disconnect lỗi: ' + e.message); }
+      if (!ws) return log('Chưa khởi tạo WS.');
+      ws.disconnect();
     };
 
     window.reconnect = () => {
       if (!ws) return log('Chưa khởi tạo WS.');
-      try { ws.reconnect(); log('Đang reconnect...'); } catch (e) { log('Reconnect lỗi: ' + e.message); }
+      ws.reconnect();
     };
 
     window.autoconnect = () => {
       if (!ws) return log('Chưa khởi tạo WS.');
-      try { ws.autoconnect(3000, 5); log('Bật autoconnect: 3s, 5 lần.'); } catch (e) { log('Autoconnect lỗi: ' + e.message); }
+      ws.autoconnect(3000, 5);
     };
 
-    // === SỰ KIỆN ===
     function setupEvents() {
       ws.on('open', () => log('OPEN: Kết nối thành công!'));
       ws.on('close', () => log('CLOSE: Đã ngắt kết nối.'));
-      ws.on('error', e => log('ERROR: ' + (e.message || 'Lỗi kết nối')));
+      ws.on('error', e => log('ERROR: ' + e.message));
+      ws.on('reconnectfailed', () => log('RECONNECT FAILED: Hết lượt thử.'));
       ws.on('message', data => {
         if (data instanceof ArrayBuffer) {
-          const len = data.byteLength;
           const view = new Uint8Array(data);
-          const preview = len > 20 ? Array.from(view.slice(0, 20)).join(', ') + '...' : Array.from(view).join(', ');
-          log(`RECEIVE BINARY [${len} bytes]: [${preview}]`);
+          const preview = view.length > 20 ? Array.from(view.slice(0, 20)).join(', ') + '...' : Array.from(view).join(', ');
+          log(`RECEIVE BINARY [${data.byteLength} bytes]: [${preview}]`);
         } else {
           log(`RECEIVE: ${JSON.stringify(data)}`);
         }
       });
     }
 
-    // === GỬI DỮ LIỆU ===
     function sendSafe(fn, preview = null) {
       if (!ws) return log('Chưa khởi tạo WS.');
       try {
@@ -117,29 +114,26 @@
       }
     }
 
-    window.sendString = () => sendSafe(() => ws.send("Xin chào từ String!"), 'SEND: String');
-    window.sendNumber = () => sendSafe(() => ws.send(98765), 'SEND: Number');
-    window.sendArray = () => sendSafe(() => ws.send([1, "abc", true, null]), 'SEND: Array');
-    window.sendObject = () => sendSafe(() => ws.send({ type: "test", ts: Date.now(), rand: Math.random() }), 'SEND: Object');
-
+    window.sendString = () => sendSafe(() => ws.send("Hello String!"), 'SEND: String');
+    window.sendNumber = () => sendSafe(() => ws.send(999), 'SEND: Number');
+    window.sendArray = () => sendSafe(() => ws.send([1,2,3]), 'SEND: Array');
+    window.sendObject = () => sendSafe(() => ws.send({a:1}), 'SEND: Object');
     window.sendUint8 = () => {
-      const arr = new Uint8Array([0, 1, 255, 100, 200, 50]);
-      sendSafe(() => ws.sendBytes(arr), `SEND Uint8Array: [${Array.from(arr).join(', ')}]`);
+      const arr = new Uint8Array([10,20,255]);
+      sendSafe(() => ws.sendBytes(arr), `SEND Uint8: [${Array.from(arr).join(', ')}]`);
     };
-
     window.sendFloat32 = () => {
-      const arr = new Float32Array([1.234, -5.678, Math.PI, 0.001]);
-      sendSafe(() => ws.sendBytes(arr), `SEND Float32Array: [${Array.from(arr).map(v => v.toFixed(4)).join(', ')}]`);
+      const arr = new Float32Array([1.1, 2.2]);
+      sendSafe(() => ws.sendBytes(arr), `SEND Float32: [${Array.from(arr).map(v=>v.toFixed(2)).join(', ')}]`);
     };
-
     window.sendMixed = () => {
-      const buffer = new ArrayBuffer(16);
-      const view = new DataView(buffer);
+      const buf = new ArrayBuffer(16);
+      const view = new DataView(buf);
       view.setUint8(0, 255);
       view.setInt16(1, -1234, true);
       view.setFloat32(4, 3.14159);
       view.setBigUint64(8, 9007199254740992n);
-      sendSafe(() => ws.sendBytes(buffer), 'SEND Mixed Binary (16 bytes): [255, int16(-1234), float(3.14159), bigint(9007...)]');
+      sendSafe(() => ws.sendBytes(buf), 'SEND Mixed Binary (16 bytes)');
     };
   </script>
 
