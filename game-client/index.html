@@ -44,9 +44,9 @@
       try {
         const auto = ws.read(data);
         log('📥 Received auto-read: ' + JSON.stringify(auto), 'evt');
-        //try { log('Uint auto: ' + ws.readUint(data), 'evt'); } catch {}
-        //try { log('Int auto: ' + ws.readInt(data), 'evt'); } catch {}
-        //try { log('Float auto: ' + ws.readFloat(data), 'evt'); } catch {}
+        try { log('Uint auto: ' + ws.readUint(data), 'evt'); } catch {}
+        try { log('Int auto: ' + ws.readInt(data), 'evt'); } catch {}
+        try { log('Float auto: ' + ws.readFloat(data), 'evt'); } catch {}
       } catch (err) {
         log('Read Error: ' + err.message, 'err');
       }
@@ -71,16 +71,16 @@
 
         ws.sendUint([1, 2, 255]);
         ws.sendUint([1000, 50000]);
-        //ws.sendUint([10n, 20n, 9999999999999n]);
+        ws.sendUint([10n, 20n, 9999999999999n]);
 
         ws.sendInt([-10, 20, -128]);
         ws.sendInt([-30000, 20000]);
-        //ws.sendInt([-9999999999n, 9999999999n]);
+        ws.sendInt([-9999999999n, 9999999999n]);
 
         ws.sendFloat([1.23, 4.56, 7.89]);
         ws.sendFloat([1.2345678901234567]);
 
-        log('All send tests executed!', 'ok');
+        log('All send tests executed!!', 'ok');
       } catch (err) {
         log('Send Error: ' + err.message, 'err');
       }
