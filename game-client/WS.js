@@ -4,7 +4,7 @@ export class WS {
   static get(url=null,opt={}) {
     if(!url){const p=location.protocol==="https:"?"wss":"ws";url=`${p}://${location.host}/`;}
     if(!this.pool.has(url)) this.pool.set(url,new WS(url,opt));
-    return this.pool.get(url);
+    return this.pool.get(url);alert();
   }
 
   constructor(url,opt={}) {
