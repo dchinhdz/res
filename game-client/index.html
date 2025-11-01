@@ -1,90 +1,128 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>WS Test</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WS Class Test - Full Data Types</title>
   <style>
-    body { background: #111; color: #eee; font-family: monospace; padding: 20px; }
-    .log { white-space: pre-wrap; }
-    .ok { color: #6f6; }
-    .err { color: #f66; }
-    .evt { color: #6cf; }
-    button { margin: 5px; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; background: #333; color: #fff; }
-    button:hover { background: #555; }
+    body { font-family: system-ui; margin: 20px; line-height: 1.6; }
+    .log { background:#f5f5f5; padding:10px; border-radius:8px; height:400px; overflow:auto; font-family: monospace; font-size:13px; }
+    button { margin:5px; padding:8px 12px; }
+    .section { margin:20px 0; padding:15px; border:1px solid #ddd; border-radius:8px; }
+    input, textarea { width:100%; padding:8px; margin:5px 0; }
   </style>
 </head>
 <body>
-  <h2>🔗 WebSocket Test (WS.js)</h2>
-  <div>
-    <button id="connect">Connect</button>
-    <button id="sendAll">Send All Types</button>
-    <button id="disconnect">Disconnect</button>
+
+  <h1>WS Class - Test Toàn Bộ Chức Năng</h1>
+  <p><strong>Server yêu cầu:</strong> WebSocket echo server hỗ trợ <code>wss://echo.websocket.org</code> hoặc local (ví dụ: Node.js echo server)</p>
+
+  <div class="section">
+    <h3>Kết nối</h3>
+    <input type="text" id="url" placeholder="URL (để trống = auto)" value="wss://echo.websocket.org" />
+    <button onclick="init()">Khởi tạo & Kết nối</button>
+    <button onclick="ws?.connect()">Connect thủ công</button>
+    <button onclick="ws?.disconnect()">Disconnect</button>
+    <button onclick="ws?.reconnect()">Reconnect</button>
+    <button onclick="ws?.autoconnect(1000, 3)">Autoconnect (1s, 3 lần)</button>
   </div>
-  <div id="log" class="log"></div>
+
+  <div class="section">
+    <h3>Gửi Dữ Liệu (Tất cả kiểu)</h3>
+    <button onclick="sendString()">String</button>
+    <button onclick="sendNumber()">Number</button>
+    <button onclick="sendArray()">Array</button>
+    <button onclick="sendObject()">Object</button>
+    <button onclick="sendUint8()">Uint8Array</button>
+    <button onclick="sendFloat32()">Float32Array</button>
+    <button onclick="sendMixed()">Mixed Binary</button>
+  </div>
+
+  <div class="section">
+    <h3>Log</h3>
+    <div id="log" class="log"></div>
+  </div>
 
   <script type="module">
     import { WS } from './WS.js';
 
-    const logBox = document.getElementById('log');
-    const log = (msg, cls='') => {
-      const el = document.createElement('div');
-      if (cls) el.className = cls;
-      el.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-      logBox.appendChild(el);
-      logBox.scrollTop = logBox.scrollHeight;
-    };
+    let ws = null;
 
-    const ws = WS.get('https://demo.piesocket.com/v3/channel_123?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self');
+    function log(msg) {
+      const div = document.getElementById('log');
+      const p = document.createElement('div');
+      p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      div.appendChild(p);
+      div.scrollTop = div.scrollHeight;
+    }
 
-    ws.on('open', () => log('Connected ✅', 'ok'));
-    ws.on('close', () => log('Disconnected ❌', 'evt'));
-    ws.on('error', e => log('Socket Error: ' + e.message, 'err'));
-    ws.on('senderror', (err, ctx) => log('Send Error: ' + err.message + ' | data=' + JSON.stringify(ctx.data), 'err'));
-    ws.on('message', data => {
+    window.init = () => {
+      const url = document.getElementById('url').value.trim();
       try {
-        const auto = ws.read(data);
-        log('📥 Received auto-read: ' + JSON.stringify(auto), 'evt');
-        try { log('Uint auto: ' + ws.readUint(data), 'evt'); } catch {}
-        try { log('Int auto: ' + ws.readInt(data), 'evt'); } catch {}
-        try { log('Float auto: ' + ws.readFloat(data), 'evt'); } catch {}
-      } catch (err) {
-        log('Read Error: ' + err.message, 'err');
-      }
-    });
-
-    document.getElementById('connect').onclick = () => {
-      try { ws.connect(); log('Connecting...', 'evt'); }
-      catch (err) { log('Connect Error: ' + err.message, 'err'); }
-    };
-
-    document.getElementById('disconnect').onclick = () => {
-      try { ws.disconnect(); log('Manually disconnected', 'evt'); }
-      catch (err) { log('Disconnect Error: ' + err.message, 'err'); }
-    };
-
-    document.getElementById('sendAll').onclick = () => {
-      try {
-        ws.send("Hello world");
-        ws.send(2025);
-        ws.send({ user: "dev", time: Date.now() });
-        ws.send([1, 2, 3, "mix"]);
-
-        ws.sendUint([1, 2, 255]);
-        ws.sendUint([1000, 50000]);
-        ws.sendUint([10n, 20n, 9999999999999n]);
-
-        ws.sendInt([-10, 20, -128]);
-        ws.sendInt([-30000, 20000]);
-        ws.sendInt([-9999999999n, 9999999999n]);
-
-        ws.sendFloat([1.23, 4.56, 7.89]);
-        ws.sendFloat([1.2345678901234567]);
-
-        log('All send tests executed!!', 'ok');
-      } catch (err) {
-        log('Send Error: ' + err.message, 'err');
+        ws = WS.get(url);
+        setupEvents();
+        ws.connect();
+        log('Đang kết nối...');
+      } catch (e) {
+        log('Lỗi khởi tạo: ' + e.message);
       }
     };
+
+    function setupEvents() {
+      ws.on('open', () => log('OPEN: Kết nối thành công!'));
+      ws.on('close', () => log('CLOSE: Ngắt kết nối.'));
+      ws.on('error', e => log('ERROR: ' + (e.message || 'Lỗi không xác định')));
+      ws.on('message', data => {
+        if (data instanceof ArrayBuffer) {
+          const view = new Uint8Array(data);
+          log(`RECEIVE BINARY [${data.byteLength} bytes]: [${Array.from(view.slice(0, 20)).join(', ')}${view.length > 20 ? '...' : ''}]`);
+        } else {
+          log(`RECEIVE: ${JSON.stringify(data)}`);
+        }
+      });
+    }
+
+    // === GỬI TẤT CẢ KIỂU DỮ LIỆU ===
+    window.sendString = () => sendSafe(() => ws.send("Xin chào từ String! 👋"));
+    window.sendNumber = () => sendSafe(() => ws.send(12345));
+    window.sendArray = () => sendSafe(() => ws.send([1, "hi", true, null]));
+    window.sendObject = () => sendSafe(() => ws.send({ action: "ping", time: Date.now(), rand: Math.random() }));
+
+    window.sendUint8 = () => {
+      const arr = new Uint8Array([0, 1, 2, 255, 100, 200]);
+      sendSafe(() => ws.sendBytes(arr), `SEND Uint8Array: [${Array.from(arr).join(', ')}]`);
+    };
+
+    window.sendFloat32 = () => {
+      const arr = new Float32Array([1.5, -2.3, Math.PI, 0.0001]);
+      sendSafe(() => ws.sendBytes(arr), `SEND Float32Array: [${Array.from(arr).map(v => v.toFixed(4)).join(', ')}]`);
+    };
+
+    window.sendMixed = () => {
+      const buffer = new ArrayBuffer(16);
+      const view = new DataView(buffer);
+      view.setUint8(0, 255);           // byte
+      view.setInt16(1, -1234, true);   // little-endian int16
+      view.setFloat32(4, 3.14159);     // float
+      view.setBigUint64(8, 9007199254740992n); // bigint
+      sendSafe(() => ws.sendBytes(buffer), 'SEND Mixed Binary (16 bytes)');
+    };
+
+    function sendSafe(fn, preview = null) {
+      try {
+        if (!ws || ws.sendBytes === undefined) throw new Error("WS chưa khởi tạo");
+        if (preview) log(preview);
+        fn();
+      } catch (e) {
+        log('SEND ERROR: ' + e.message);
+      }
+    }
+
+    // Test auto nếu không có URL
+    if (!document.getElementById('url').value) {
+      log('Tip: Để trống URL → tự động dùng ws:// hoặc wss:// + host hiện tại');
+    }
   </script>
+
 </body>
 </html>
