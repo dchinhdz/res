@@ -34,7 +34,7 @@
       logBox.scrollTop = logBox.scrollHeight;
     };
 
-    const ws = WS.get();
+    const ws = WS.get('https://demo.piesocket.com/v3/channel_123?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self');
     ws.debug = true;
 
     ws.on('open', () => log('Connected ✅', 'ok'));
