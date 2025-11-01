@@ -1,14 +1,17 @@
 export class WS {
   static pool = new Map();
 
-  static get(url, opt = {}) {
+  static get(url = null, opt = {}) {
+    if (!url) {
+      const proto = location.protocol === "https:" ? "wss" : "ws";
+      url = `${proto}://${location.host}/`;
+    }
     if (!this.pool.has(url)) this.pool.set(url, new WS(url, opt));
     return this.pool.get(url);
   }
 
   constructor(url, opt = {}) {
     this.url = url;
-    this.protocols = opt.protocols;
     this.auto = opt.auto ?? false;
     this.max = opt.max ?? 5;
     this.delay = opt.delay ?? 1000;
@@ -20,31 +23,20 @@ export class WS {
     this.ws = null;
   }
 
-  on(e, f) {
-    (this.events[e] ??= new Set()).add(f);
-  }
-
-  off(e, f) {
-    this.events[e]?.delete(f);
-  }
-
-  once(e, f) {
-    (this.onceEvents[e] ??= new Set()).add(f);
-  }
+  on(e, f) { (this.events[e] ??= new Set()).add(f); }
+  off(e, f) { this.events[e]?.delete(f); }
+  once(e, f) { (this.onceEvents[e] ??= new Set()).add(f); }
 
   emit(e, ...a) {
     if (this.debug) console.log(`[WS] ${e}`, ...a);
     this.events[e]?.forEach(fn => fn(...a));
-    if (this.onceEvents[e]) {
-      this.onceEvents[e].forEach(fn => fn(...a));
-      delete this.onceEvents[e];
-    }
+    if (this.onceEvents[e]) { this.onceEvents[e].forEach(fn => fn(...a)); delete this.onceEvents[e]; }
   }
 
   connect() {
     if (this.ws && [0, 1].includes(this.ws.readyState)) return;
     this.manual = false;
-    const ws = new WebSocket(this.url, this.protocols);
+    const ws = new WebSocket(this.url);
     ws.binaryType = "arraybuffer";
     ws.onopen = e => { this.retry = 0; this.emit("open", e); };
     ws.onerror = e => this.emit("error", e);
@@ -55,14 +47,9 @@ export class WS {
 
   handleMsg(e) {
     let d = e.data;
-    if (typeof d === "string") {
-      try { d = JSON.parse(d); } catch {}
-      this.emit("message", d, e);
-    } else if (d instanceof Blob) {
-      d.arrayBuffer().then(b => this.emit("message", b, e));
-    } else {
-      this.emit("message", d, e);
-    }
+    if (typeof d === "string") { try { d = JSON.parse(d); } catch {} }
+    else if (d instanceof Blob) return d.arrayBuffer().then(b => this.emit("message", b, e));
+    this.emit("message", d, e);
   }
 
   disconnect(code = 1000, reason = "bye") {
@@ -80,7 +67,7 @@ export class WS {
   send(v) {
     this.ensure();
     if (typeof v === "string") this.ws.send(v);
-    else if (v instanceof ArrayBuffer || ArrayBuffer.isView(v)) this.ws.send(this.toBuf(v));
+    else if (v instanceof ArrayBuffer || ArrayBuffer.isView(v)) this.ws.send(this.buf(v));
     else this.ws.send(JSON.stringify(v));
   }
 
@@ -92,11 +79,8 @@ export class WS {
     }[t.toLowerCase()];
     if (!T) throw new Error("Bad type");
     if (typeof d === "number") d = new T(d);
-    else if (Array.isArray(d)) {
-      d = (T.BYTES_PER_ELEMENT === 8)
-        ? new T(d.map(x => BigInt(x)))
-        : new T(d);
-    }
+    else if (Array.isArray(d))
+      d = (T.BYTES_PER_ELEMENT === 8) ? new T(d.map(BigInt)) : new T(d);
     this.send(d);
   }
 
@@ -105,7 +89,7 @@ export class WS {
       throw new Error("WebSocket not open");
   }
 
-  toBuf(v) {
+  buf(v) {
     return ArrayBuffer.isView(v)
       ? v.buffer.slice(v.byteOffset, v.byteOffset + v.byteLength)
       : v;
