@@ -2,140 +2,134 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>WS Class Test - Final Fixed</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WS Test</title>
   <style>
-    body { font-family: system-ui; margin: 20px; line-height: 1.6; }
-    .log { background:#f5f5f5; padding:10px; border-radius:8px; height:400px; overflow:auto; font-family: monospace; font-size:13px; }
-    button { margin:5px; padding:8px 12px; }
-    .section { margin:20px 0; padding:15px; border:1px solid #ddd; border-radius:8px; }
-    input { width:100%; padding:8px; margin:5px 0; }
+    :root { --bg: #1a1a1a; --fg: #e0e0e0; --acc: #00d4ff; --err: #ff4d4d; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:var(--bg); color:var(--fg); font:14px/1.5 system-ui; padding:16px; display:flex; flex-direction:column; gap:12px; min-height:100vh; }
+    .row { display:flex; gap:8px; flex-wrap:wrap; }
+    button { background:var(--acc); color:#000; border:none; padding:10px 14px; border-radius:6px; font-weight:600; cursor:pointer; flex:1; min-width:100px; }
+    button:disabled { opacity:0.4; cursor:not-allowed; }
+    button.err { background:var(--err); }
+    input, textarea { flex:1; padding:10px; border:1px solid #444; border-radius:6px; background:#222; color:var(--fg); }
+    #log { flex:1; background:#111; padding:12px; border-radius:6px; overflow:auto; font-family:monospace; font-size:13px; max-height:50vh; }
+    .msg { margin:4px 0; }
+    .open { color:#4ade80; }
+    .close { color:#fb923c; }
+    .error { color:var(--err); }
+    .sent { color:#a5b4fc; }
   </style>
 </head>
 <body>
-
-  <h1>WS Class - ĐÃ FIX HOÀN TOÀN</h1>
-  <p>Chỉ 1 phiên kết nối duy nhất. Connect/Disconnect/Autoconnect có điều kiện rõ ràng.</p>
-
-  <div class="section">
-    <h3>Kết nối</h3>
-    <input type="text" id="url" placeholder="URL (để trống = auto)" value="wss://echo.websocket.org" />
-    <button onclick="init()">Khởi tạo WS (1 lần duy nhất)</button>
-    <button onclick="connect()">Connect</button>
-    <button onclick="disconnect()">Disconnect</button>
-    <button onclick="reconnect()">Reconnect</button>
-    <button onclick="autoconnect()">Autoconnect (3s, 5 lần)</button>
+  <div class="row">
+    <input id="host" placeholder="Host" value="echo.websocket.org" />
+    <button id="init">Khởi tạo</button>
   </div>
-
-  <div class="section">
-    <h3>Gửi Dữ Liệu</h3>
-    <button onclick="sendString()">String</button>
-    <button onclick="sendNumber()">Number</button>
-    <button onclick="sendArray()">Array</button>
-    <button onclick="sendObject()">Object</button>
-    <button onclick="sendUint8()">Uint8Array</button>
-    <button onclick="sendFloat32()">Float32Array</button>
-    <button onclick="sendMixed()">Mixed Binary</button>
+  <div class="row">
+    <button id="connect">Connect</button>
+    <button id="disconnect">Disconnect</button>
+    <button id="reconnect">Reconnect</button>
+    <button id="autoconnect">Autoconnect</button>
   </div>
-
-  <div class="section">
-    <h3>Log</h3>
-    <div id="log" class="log"></div>
+  <div class="row">
+    <button id="sendStr">Gửi String</button>
+    <button id="sendNum">Gửi Number</button>
+    <button id="sendObj">Gửi Object</button>
+    <button id="sendArr">Gửi Array</button>
   </div>
+  <div class="row">
+    <button id="sendU8">Gửi Uint8Array</button>
+    <button id="sendU16">Gửi Uint16Array</button>
+    <button id="sendU32">Gửi Uint32Array</button>
+    <button id="sendBuf">Gửi ArrayBuffer</button>
+  </div>
+  <div class="row">
+    <button id="send100">Gửi 100</button>
+    <button id="send1000">Gửi 1000</button>
+  </div>
+  <div id="log"></div>
 
   <script type="module">
     import { WS } from './WS.js';
 
+    const $ = id => document.getElementById(id);
+    const log = (msg, cls = '') => {
+      const div = document.createElement('div');
+      div.className = `msg ${cls}`;
+      div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      $('log').appendChild(div);
+      div.scrollIntoView();
+    };
+
     let ws = null;
+    const getUrl = () => `wss://${$('host').value.trim() || 'echo.websocket.org'}`;
 
-    function log(msg) {
-      const div = document.getElementById('log');
-      const p = document.createElement('div');
-      p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-      div.appendChild(p);
-      div.scrollTop = div.scrollHeight;
-    }
-
-    window.init = () => {
-      if (ws) return log('ĐÃ khởi tạo rồi! Chỉ 1 lần duy nhất.');
-      const url = document.getElementById('url').value.trim();
+    const init = () => {
       try {
-        ws = WS.get(url);
-        setupEvents();
-        log('WS instance tạo thành công. Dùng Connect để kết nối.');
+        ws = new WS(getUrl());
+        ws.on('open', () => log('Kết nối thành công', 'open'));
+        ws.on('close', () => log('Ngắt kết nối', 'close'));
+        ws.on('error', e => log(`Lỗi: ${e.message || e}`, 'error'));
+        ws.on('message', d => log(`← ${typeof d === 'object' ? JSON.stringify(d) : d}`, 'sent'));
+        ws.on('reconnectfailed', () => log('Tự động kết nối thất bại', 'error'));
+        log('Khởi tạo WS thành công');
+        $('init').disabled = true;
       } catch (e) {
-        log('Lỗi khởi tạo: ' + e.message);
+        log(`Khởi tạo thất bại: ${e.message}`, 'error');
       }
     };
 
-    window.connect = () => {
-      if (!ws) return log('Chưa khởi tạo WS.');
-      ws.connect();
-    };
+    $('init').onclick = init;
+    $('connect').onclick = () => { try { ws.connect(); } catch (e) { log(e.message, 'error'); } };
+    $('disconnect').onclick = () => { try { ws.disconnect(); } catch (e) { log(e.message, 'error'); } };
+    $('reconnect').onclick = () => { try { ws.reconnect(); } catch (e) { log(e.message, 'error'); } };
+    $('autoconnect').onclick = () => { try { ws.autoconnect(); } catch (e) { log(e.message, 'error'); } };
 
-    window.disconnect = () => {
-      if (!ws) return log('Chưa khởi tạo WS.');
-      ws.disconnect();
-    };
-
-    window.reconnect = () => {
-      if (!ws) return log('Chưa khởi tạo WS.');
-      ws.reconnect();
-    };
-
-    window.autoconnect = () => {
-      if (!ws) return log('Chưa khởi tạo WS.');
-      ws.autoconnect(3000, 5);
-    };
-
-    function setupEvents() {
-      ws.on('open', () => log('OPEN: Kết nối thành công!'));
-      ws.on('close', () => log('CLOSE: Đã ngắt kết nối.'));
-      ws.on('error', e => log('ERROR: ' + e.message));
-      ws.on('reconnectfailed', () => log('RECONNECT FAILED: Hết lượt thử.'));
-      ws.on('message', data => {
-        if (data instanceof ArrayBuffer) {
-          const view = new Uint8Array(data);
-          const preview = view.length > 20 ? Array.from(view.slice(0, 20)).join(', ') + '...' : Array.from(view).join(', ');
-          log(`RECEIVE BINARY [${data.byteLength} bytes]: [${preview}]`);
+    const send = (data, type = '') => {
+      try {
+        if (type === 'bytes') {
+          ws.sendBytes(data);
+          log(`→ [${type}] ${data instanceof ArrayBuffer ? 'ArrayBuffer' : data.constructor.name} [${[...new Uint8Array(data.buffer || data)].join(', ')}]`, 'sent');
         } else {
-          log(`RECEIVE: ${JSON.stringify(data)}`);
+          ws.send(data);
+          log(`→ [${type}] ${typeof data === 'object' ? JSON.stringify(data) : data}`, 'sent');
         }
-      });
-    }
-
-    function sendSafe(fn, preview = null) {
-      if (!ws) return log('Chưa khởi tạo WS.');
-      try {
-        if (preview) log(preview);
-        fn();
-      } catch (e) {
-        log('SEND ERROR: ' + e.message);
-      }
-    }
-
-    window.sendString = () => sendSafe(() => ws.send("Hello String!"), 'SEND: String');
-    window.sendNumber = () => sendSafe(() => ws.send(999), 'SEND: Number');
-    window.sendArray = () => sendSafe(() => ws.send([1,2,3]), 'SEND: Array');
-    window.sendObject = () => sendSafe(() => ws.send({a:1}), 'SEND: Object');
-    window.sendUint8 = () => {
-      const arr = new Uint8Array([10,20,255]);
-      sendSafe(() => ws.sendBytes(arr), `SEND Uint8: [${Array.from(arr).join(', ')}]`);
+      } catch (e) { log(e.message, 'error'); }
     };
-    window.sendFloat32 = () => {
-      const arr = new Float32Array([1.1, 2.2]);
-      sendSafe(() => ws.sendBytes(arr), `SEND Float32: [${Array.from(arr).map(v=>v.toFixed(2)).join(', ')}]`);
+
+    $('sendStr').onclick = () => send('Hello WebSocket! Đã test tiếng Việt OK', 'string');
+    $('sendNum').onclick = () => send(123456789, 'number');
+    $('sendObj').onclick = () => send({ action: 'test', value: Math.random(), time: Date.now(), ok: true }, 'object');
+    $('sendArr').onclick = () => send([1, "text", null, { x: 10 }, true, [9, 8]], 'array');
+
+    $('sendU8').onclick = () => {
+      const arr = new Uint8Array(8);
+      crypto.getRandomValues(arr);
+      send(arr, 'bytes');
     };
-    window.sendMixed = () => {
+    $('sendU16').onclick = () => {
+      const arr = new Uint16Array(4);
+      crypto.getRandomValues(arr);
+      send(arr, 'bytes');
+    };
+    $('sendU32').onclick = () => {
+      const arr = new Uint32Array(2);
+      crypto.getRandomValues(arr);
+      send(arr, 'bytes');
+    };
+    $('sendBuf').onclick = () => {
       const buf = new ArrayBuffer(16);
-      const view = new DataView(buf);
-      view.setUint8(0, 255);
-      view.setInt16(1, -1234, true);
-      view.setFloat32(4, 3.14159);
-      view.setBigUint64(8, 9007199254740992n);
-      sendSafe(() => ws.sendBytes(buf), 'SEND Mixed Binary (16 bytes)');
+      const view = new Uint8Array(buf);
+      crypto.getRandomValues(view);
+      send(buf, 'bytes');
     };
-  </script>
 
+    const sendMany = n => {
+      for (let i = 0; i < n; i++) send({ i, t: Date.now(), r: Math.random() }, 'bulk');
+    };
+    $('send100').onclick = () => sendMany(100);
+    $('send1000').onclick = () => sendMany(1000);
+  </script>
 </body>
 </html>
