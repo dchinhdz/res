@@ -27,7 +27,7 @@
       ws.onmessage = (e) => {
         if (e.data === 'ping' && ws.pingStart) {
           const ms = Math.round(performance.now() - ws.pingStart);
-          log.textContent += `Pong:: ${ms} ms\n`;
+          log.textContent += `[${new Date.now().toLocaleTimeString()}]: ${ms} ms\n`;
           delete ws.pingStart;
         }
       };
