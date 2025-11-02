@@ -20,14 +20,14 @@
         if (ws.readyState === WebSocket.OPEN) {
           const start = performance.now();
           ws.pingStart = start; // lưu thời gian gửi
-          ws.send('ping'); // gửi "ping"
+          ws.send(new Uint8Array ([255])); // gửi "ping"
         }
       };
 
       ws.onmessage = (e) => {
         if (e.data === 'ping' && ws.pingStart) {
           const ms = Math.round(performance.now() - ws.pingStart);
-          log.textContent += `Pong: ${ms} ms\n`;
+          log.textContent += `Pong:: ${ms} ms\n`;
           delete ws.pingStart;
         }
       };
