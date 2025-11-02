@@ -3,61 +3,31 @@
 <head>
   <title>Ping WebSocket</title>
   <style>
-    body { font-family: monospace; padding: 20px; }
-    #log { white-space: pre; }
+    body{font-family:monospace;padding:20px}
+    #log{white-space:pre;height:300px;overflow:auto;border:1px solid #ccc;padding:10px}
   </style>
 </head>
 <body>
-  <h3>WebSocket Ping to echo.websocket.org</h3>
+  <h3>WebSocket Ping (5s) + Auto Reconnect</h3>
   <div id="log"></div>
 
   <script>
-    const log = document.getElementById('log');
-    const url = 'wss://echo.websocket.org';
-    let ws, pingTimer, reconnectTimer, pingStart;
+    const log=document.getElementById('log'),url='wss://echo.websocket.org';
+    let ws,pingTimer,reconnectTimer,pingStart;
+    const t=()=>new Date().toLocaleTimeString();
+    const a=m=>log.textContent+=`[${t()}]: ${m}\n`;
 
-    function appendLog(msg) {
-      log.textContent += `[${new Date().toLocaleTimeString()}]: ${msg}\n`;
-    }
-
-    function sendPing() {
-      if (ws?.readyState !== WebSocket.OPEN) return;
-      pingStart = performance.now();
-      ws.send(new Uint8Array([255])); // Gửi ping (byte 255)
-    }
-
-    function connect() {
+    const ping=()=>{if(ws?.readyState===1){pingStart=performance.now();ws.send(new Uint8Array([255]));}};
+    const connect=()=>{
       clearTimeout(reconnectTimer);
-      ws = new WebSocket(url);
-
-      ws.onopen = () => {
-        appendLog('Đã kết nối');
-        sendPing();
-        pingTimer = setInterval(sendPing, 5000);
-      };
-
-      ws.onmessage = (e) => {
-        if (e.data instanceof Blob) {
-          const reader = new FileReader();
-          reader.onload = () => {
-            if (reader.result === 255 && pingStart) {
-              const ms = Math.round(performance.now() - pingStart);
-              appendLog(`${ms} ms`);
-            }
-          };
-          reader.readAsArrayBuffer(e.data);
-        }
-      };
-
-      ws.onerror = () => appendLog('Lỗi kết nối');
-      ws.onclose = () => {
-        appendLog('Mất kết nối, đang thử lại...');
-        clearInterval(pingTimer);
-        reconnectTimer = setTimeout(connect, 3000); // Reconnect sau 3s
-      };
-    }
-
-    connect(); // Khởi động lần đầu
+      ws=new WebSocket(url);
+      ws.binaryType='arraybuffer';
+      ws.onopen=()=>{a('Kết nối');clearInterval(pingTimer);pingTimer=setInterval(ping,5000);ping();}
+      ws.onmessage=e=>{const d=e.data;if(d instanceof ArrayBuffer&&d.byteLength===1&&new Uint8Array(d)[0]===255&&pingStart){a(`Ping: ${Math.round(performance.now()-pingStart)} ms`);pingStart=null;}}
+      ws.onerror=()=>a('Lỗi');
+      ws.onclose=()=>{a('Ngắt → Thử lại 3s');clearInterval(pingTimer);reconnectTimer=setTimeout(connect,3000);}
+    };
+    connect();
   </script>
 </body>
 </html>
