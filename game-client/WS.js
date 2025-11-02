@@ -23,13 +23,24 @@ export class WS {
       const ws = this.#ws = new WebSocket(this.#url);
       ws.binaryType = "arraybuffer";
 
-      ws.onopen = () => { this.#connected = true; this.#retry = 0; this.#emit("open"); };
+      ws.onopen = () => {
+        this.#connected = true;
+        this.#retry = 0;
+        this.#emit("open");
+      };
+
       ws.onerror = e => this.#emit("error", e);
-      ws.onclose = () => { this.#ws = null; this.#connected = false; this.#emit("close"); this.#auto && this.#reconnect(); };
+      ws.onclose = () => {
+        const wasConnected = this.#connected;
+        this.#ws = null;
+        this.#connected = false;
+        this.#emit("close");
+        if (this.#auto && wasConnected) this.#reconnect();
+      };
       ws.onmessage = e => this.#handle(e);
     } catch (err) {
       this.#emit("error", err);
-      throw err; // Tự động ném ra ngoài → dev bắt bằng catch
+      throw err;
     }
   }
 
