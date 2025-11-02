@@ -19,6 +19,7 @@
     .close { color:#fb923c; }
     .error { color:var(--err); }
     .sent { color:#a5b4fc; }
+    .recv { color:#c084fc; }
   </style>
 </head>
 <body>
@@ -71,8 +72,23 @@
         ws.on('open', () => log('Kết nối thành công', 'open'));
         ws.on('close', () => log('Ngắt kết nối', 'close'));
         ws.on('error', e => log(`Lỗi: ${e.message || e}`, 'error'));
-        ws.on('message', d => log(`← ${typeof d === 'object' ? JSON.stringify(d) : d}`, 'sent'));
         ws.on('reconnectfailed', () => log('Tự động kết nối thất bại', 'error'));
+
+        ws.on('message', d => {
+          if (d instanceof ArrayBuffer) {
+            const u8 = new Uint8Array(d);
+            const hex = [...u8].map(b => b.toString(16).padStart(2, '0')).join(' ');
+            const u16 = new Uint16Array(d);
+            const u32 = new Uint32Array(d);
+            log(`← [Bytes] Len:${d.byteLength} | Hex: ${hex}`, 'recv');
+            log(`   → Uint8: [${[...u8].join(', ')}]`, 'recv');
+            if (u16.length) log(`   → Uint16: [${[...u16].join(', ')}]`, 'recv');
+            if (u32.length) log(`   → Uint32: [${[...u32].join(', ')}]`, 'recv');
+          } else {
+            log(`← ${typeof d === 'object' ? JSON.stringify(d) : d}`, 'recv');
+          }
+        });
+
         log('Khởi tạo WS thành công');
         $('init').disabled = true;
       } catch (e) {
@@ -90,7 +106,8 @@
       try {
         if (type === 'bytes') {
           ws.sendBytes(data);
-          log(`→ [${type}] ${data instanceof ArrayBuffer ? 'ArrayBuffer' : data.constructor.name} [${[...new Uint8Array(data.buffer || data)].join(', ')}]`, 'sent');
+          const u8 = new Uint8Array(data.buffer || data);
+          log(`→ [${type}] ${data instanceof ArrayBuffer ? 'ArrayBuffer' : data.constructor.name} [${[...u8].join(', ')}]`, 'sent');
         } else {
           ws.send(data);
           log(`→ [${type}] ${typeof data === 'object' ? JSON.stringify(data) : data}`, 'sent');
