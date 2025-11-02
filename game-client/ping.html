@@ -12,32 +12,52 @@
   <div id="log"></div>
 
   <script>
-    const ws = new WebSocket('wss://echo.websocket.org');
     const log = document.getElementById('log');
+    const url = 'wss://echo.websocket.org';
+    let ws, pingTimer, reconnectTimer, pingStart;
 
-    ws.onopen = () => {
-      const ping = () => {
-        if (ws.readyState === WebSocket.OPEN) {
-          const start = performance.now();
-          ws.pingStart = start; // lưu thời gian gửi
-          ws.send(new Uint8Array ([255])); // gửi "ping"
-        }
+    function appendLog(msg) {
+      log.textContent += `[${new Date().toLocaleTimeString()}]: ${msg}\n`;
+    }
+
+    function sendPing() {
+      if (ws?.readyState !== WebSocket.OPEN) return;
+      pingStart = performance.now();
+      ws.send(new Uint8Array([255])); // Gửi ping (byte 255)
+    }
+
+    function connect() {
+      clearTimeout(reconnectTimer);
+      ws = new WebSocket(url);
+
+      ws.onopen = () => {
+        appendLog('Đã kết nối');
+        sendPing();
+        pingTimer = setInterval(sendPing, 5000);
       };
 
       ws.onmessage = (e) => {
-        if (e.data === 'ping' && ws.pingStart) {
-          const ms = Math.round(performance.now() - ws.pingStart);
-          log.textContent += `[${new Date.now().toLocaleTimeString()}]: ${ms} ms\n`;
-          delete ws.pingStart;
+        if (e.data instanceof Blob) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            if (reader.result === 255 && pingStart) {
+              const ms = Math.round(performance.now() - pingStart);
+              appendLog(`${ms} ms`);
+            }
+          };
+          reader.readAsArrayBuffer(e.data);
         }
       };
 
-      setInterval(ping, 5000);
-      ping(); // gửi ngay lần đầu
-    };
+      ws.onerror = () => appendLog('Lỗi kết nối');
+      ws.onclose = () => {
+        appendLog('Mất kết nối, đang thử lại...');
+        clearInterval(pingTimer);
+        reconnectTimer = setTimeout(connect, 3000); // Reconnect sau 3s
+      };
+    }
 
-    ws.onerror = () => log.textContent += 'Lỗi kết nối\n';
-    ws.onclose = () => log.textContent += 'Đã đóng kết nối\n';
+    connect(); // Khởi động lần đầu
   </script>
 </body>
 </html>
