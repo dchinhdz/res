@@ -13,7 +13,7 @@ export class WS {
 
   #emit(e, ...a) { this.#events.get(e)?.forEach(f => f(...a)); }
   on(e, f) { (this.#events.has(e) ? this.#events.get(e) : this.#events.set(e, new Set()).get(e)).add(f); }
-  #reset() { this.#ws = this.#connected = this.#auto = null; this.#retry = 0; }
+  #reset() { this.#ws = null; this.#connected = false; this.#auto = false; this.#retry = 0; }
 
   connect() {
     if (this.#connected || this.#ws?.readyState === 1) return this.#emit("error", new Error("Already connected"));
@@ -44,6 +44,13 @@ export class WS {
     }
   }
 
+  /** SỬA LỖI: reconnect() KHÔNG GỌI disconnect() → giữ #ws cũ → lỗi send null */
+  reconnect() {
+    this.#reset(); // XÓA #ws HOÀN TOÀN TRƯỚC KHI KẾT NỐI LẠI
+    WS.#pool.delete(this.#url); // XÓA KHỎI POOL ĐỂ TẠO MỚI
+    this.connect();
+  }
+
   disconnect() {
     if (!this.#connected && (!this.#ws || this.#ws.readyState === 3)) return this.#emit("error", new Error("Not connected"));
     this.#auto = false;
@@ -51,8 +58,6 @@ export class WS {
     this.#reset();
     WS.#pool.delete(this.#url);
   }
-
-  reconnect() { this.disconnect(); this.connect(); }
 
   autoconnect(delay = this.#opt.delay, max = this.#opt.max) {
     if (this.#connected || this.#ws?.readyState === 1) return this.#emit("error", new Error("Already connected"));
@@ -73,12 +78,12 @@ export class WS {
   }
 
   send(data) {
-    if (!this.#connected) throw new Error("WebSocket not open");
+    if (!this.#connected || !this.#ws) throw new Error("WebSocket not open");
     this.#ws.send(typeof data === "object" ? JSON.stringify(data) : String(data));
   }
 
   sendBytes(data) {
-    if (!this.#connected) throw new Error("WebSocket not open");
+    if (!this.#connected || !this.#ws) throw new Error("WebSocket not open");
     if (!(data instanceof ArrayBuffer) && !ArrayBuffer.isView(data)) throw new TypeError("sendBytes: ArrayBuffer or TypedArray required");
     const buf = data instanceof ArrayBuffer ? data : data.buffer;
     const off = data.byteOffset || 0;
