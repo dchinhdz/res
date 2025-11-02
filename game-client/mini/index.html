@@ -29,10 +29,10 @@ input,textarea{flex:1;padding:9px;border:1px solid #444;border-radius:6px;backgr
 <div id="log"></div>
 
 <script type="module">
-import {W as S}from'./W.js';
+import {W}from'./W.js';
 const $=i=>document.getElementById(i),L=(t,c='')=>{const d=document.createElement('div');d.className=`m ${c}`;d.textContent=`[${new Date().toLocaleTimeString()}] ${t}`;$('log').appendChild(d);d.scrollIntoView()};
 let s=null,U=()=>`wss://${$('h').value.trim()||'echo.websocket.org'}`;
-const I=()=>{try{s=new S(U());s.n('o',()=>L('Kết nối OK','o'));s.n('l',()=>L('Ngắt','l'));s.n('e',e=>L(`Lỗi: ${e.message||e}`,'e'));s.n('f',()=>L('Reconnect fail','e'));
+const I=()=>{try{s=new W(U());s.n('o',()=>L('Kết nối OK','o'));s.n('l',()=>L('Ngắt','l'));s.n('e',e=>L(`Lỗi: ${e.message||e}`,'e'));s.n('f',()=>L('Reconnect fail','e'));
 s.n('m',d=>{if(d instanceof ArrayBuffer){const u=new Uint8Array(d),h=[...u].map(b=>b.toString(16).padStart(2,'0')).join(' '),v=new Uint16Array(d),w=new Uint32Array(d);
 L(`← Bytes ${d.byteLength} | Hex: ${h}`,'r');L(`   U8: [${[...u].join(', ')}]`,'r');
 if(v.length)L(`   U16: [${[...v].join(', ')}]`,'r');if(w.length)L(`   U32: [${[...w].join(', ')}]`,'r')
