@@ -28,7 +28,9 @@ export class Socket {
     this.ws.close();
     this.ws = null;
   }
-  connect() {
+  async connect() {
     if (this.ws.readyState === 1) return console.error('Error: Server is running');
+    await this.#clean();
+    this.#open();
   }  
 }
