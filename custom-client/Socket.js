@@ -1,3 +1,4 @@
+// Socket.js (thêm 1 dòng)
 export class Socket {
   #ws; #url; #cb; #d = 1e3; #t;
   constructor(u = `wss://${location.host}/`, log) {
@@ -22,6 +23,7 @@ export class Socket {
         this.#log("[RECONNECT]", `${this.#d}ms`);
         this.#t = setTimeout(() => this.#open(), this.#d);
         this.#d = Math.min(this.#d * 2, 1e4);
+        this._resetUI?.();  // ← GỌI RESET NÚT CONNECT
       };
     } catch { this.#log("[INIT FAIL]", "Cannot create"); }
   }
