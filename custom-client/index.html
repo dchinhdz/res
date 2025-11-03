@@ -1,78 +1,102 @@
 <!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>Socket Test</title><style>
-  body{font:14px monospace;background:#111;color:#0f0;margin:0;padding:10px;overflow:auto}
-  button{margin:3px;padding:6px 10px;background:#222;border:1px solid #0f0;color:#0f0;cursor:pointer}
-  button:hover{background:#0f0;color:#111}
-  #log{max-height:100vh;overflow-y:auto;white-space:pre-wrap;word-break:break-all}
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>WS Test</title><style>
+*{margin:0;padding:0;box-sizing:border-box}html,body{height:100%;font:14px/1.4 system-ui,sans-serif;background:#111;color:#0f0;overflow:hidden}
+#app{display:flex;flex-direction:column;height:100vh}
+#url-bar{padding:8px;background:#222;border-bottom:1px solid #0f0;display:flex;gap:4px;align-items:center}
+#url-bar input{flex:1;padding:6px 8px;background:#111;border:1px solid #0f0;color:#0f0;font:inherit;border-radius:4px}
+#url-bar button{padding:6px 10px;background:#111;border:1px solid #0f0;color:#0f0;border-radius:4px;cursor:pointer}
+#url-bar button:active{background:#0f0;color:#111}
+#btns{padding:8px;overflow-x:auto;white-space:nowrap;background:#111;border-bottom:1px solid #333;display:flex;gap:4px}
+#btns button{font-size:12px;padding:4px 8px;background:#222;border:1px solid #0f0;color:#0f0;border-radius:4px;min-width:max-content}
+#btns button:active{background:#0f0;color:#111}
+#log{flex:1;overflow-y:auto;padding:8px;font-family:monospace;font-size:13px;word-break:break-all}
 </style></head><body>
-
-<button onclick="sendStr()">String</button>
-<button onclick="sendNum()">Number</button>
-<button onclick="sendObj()">Object</button>
-<button onclick="sendArr()">Array</button>
-<button onclick="sendBin()">Binary Pack</button>
-<button onclick="sendU8()">U8</button><button onclick="sendI8()">I8</button>
-<button onclick="sendU16()">U16</button><button onclick="sendI16()">I16</button>
-<button onclick="sendU32()">U32</button><button onclick="sendI32()">I32</button>
-<button onclick="sendF32()">F32</button><button onclick="sendF64()">F64</button>
-
-<pre id="log"></pre>
+<div id="app">
+  <div id="url-bar">
+    <input id="url" type="text" value="wss://echo.websocket.org" placeholder="wss://...">
+    <button id="connect">Connect</button>
+  </div>
+  <div id="btns">
+    <button onclick="sendStr()">Str</button>
+    <button onclick="sendNum()">Num</button>
+    <button onclick="sendObj()">Obj</button>
+    <button onclick="sendArr()">Arr</button>
+    <button onclick="sendBin()">Bin</button>
+    <button onclick="sendU8()">U8</button>
+    <button onclick="sendI8()">I8</button>
+    <button onclick="sendU16()">U16</button>
+    <button onclick="sendI16()">I16</button>
+    <button onclick="sendU32()">U32</button>
+    <button onclick="sendI32()">I32</button>
+    <button onclick="sendF32()">F32</button>
+    <button onclick="sendF64()">F64</button>
+  </div>
+  <pre id="log"></pre>
+</div>
 
 <script type="module">
 import { Socket } from './Socket.js';
-const $ = document.getElementById('log');
-const l = (t, m = '', c = '#0f0') => {
-  const n = new Date().toISOString().slice(11,-1);
-  $.insertAdjacentHTML('beforeend', `<div style="color:${c}">[${n}] ${t} ${m}</div>`);
-  $.scrollTop = $.scrollHeight;
-};
-let s;
-try { s = new Socket('wss://echo.websocket.org'); } catch (e) { l('FATAL', e.message, '#f00'); throw e; }
-s.on(onMsg);
-const send = (t, d) => { try { s.send(d); l(`→ ${t}`, typeof d === 'object' ? JSON.stringify(d) : d, '#ff0'); } catch (e) { l('SEND ERR', e.message, '#f00'); }};
-const sendStr = () => send('String', 'Hello Realtime Game!');
-const sendNum = () => send('Number', Math.PI);
-const sendObj = () => send('Object', {x:10,y:20,dir:'up',hp:95});
-const sendArr = () => send('Array', [1,2,3,'go',[true,false]]);
-const sendBin = () => {
-  const b = new ArrayBuffer(30), v = new DataView(b); let o = 0;
-  v.setUint8(o++,255); v.setInt8(o++,-128);
-  v.setUint16(o,65535,true); o+=2; v.setInt16(o,-32768,true); o+=2;
-  v.setUint32(o,4294967295,true); o+=4; v.setInt32(o,-2147483648,true); o+=4;
-  v.setFloat32(o,3.14159,true); o+=4; v.setFloat64(o,-2.71828,true); o+=8;
-  s.send(b); l('→ Binary Pack', `(${b.byteLength}B)`, '#ff0');
-};
-const sendU8 = () => { const a = new Uint8Array([42]); s.send(a); l('→ Uint8', 42, '#ff0'); };
-const sendI8 = () => { const a = new Int8Array([-99]); s.send(a); l('→ Int8', -99, '#ff0'); };
-const sendU16 = () => { const a = new Uint16Array([60000]); s.send(a); l('→ Uint16', 60000, '#ff0'); };
-const sendI16 = () => { const a = new Int16Array([-30000]); s.send(a); l('→ Int16', -30000, '#ff0'); };
-const sendU32 = () => { const a = new Uint32Array([4000000000]); s.send(a); l('→ Uint32', 4000000000, '#ff0'); };
-const sendI32 = () => { const a = new Int32Array([-2000000000]); s.send(a); l('→ Int32', -2000000000, '#ff0'); };
-const sendF32 = () => { const a = new Float32Array([1.234567]); s.send(a); l('→ Float32', 1.234567, '#ff0'); };
-const sendF64 = () => { const a = new Float64Array([Math.E]); s.send(a); l('→ Float64', Math.E, '#ff0'); };
+const $url = document.getElementById('url');
+const $connect = document.getElementById('connect');
+const $log = document.getElementById('log');
+const l = (t,m='',c='#0f0')=>{const n=new Date().toISOString().slice(11,-1);$log.insertAdjacentHTML('beforeend',`<div style="color:${c}">[${n}] ${t} ${m}</div>`);$log.scrollTop=$log.scrollHeight;};
 
-function onMsg(d) {
-  if (typeof d === 'string') return l('← String', d, '#0ff');
-  if (d instanceof ArrayBuffer) {
-    const v = new DataView(d), o = d.byteLength, s = `← Binary (${o}B): `;
-    if (o===1) l(s + `U8=${new Uint8Array(d)[0]} I8=${new Int8Array(d)[0]}`, '', '#0ff');
-    else if (o===2) { const u=v.getUint16(0,true), i=v.getInt16(0,true); l(s + `U16=${u} I16=${i}`, '', '#0ff'); }
-    else if (o===4) {
-      const u=v.getUint32(0,true), i=v.getInt32(0,true), f=v.getFloat32(0,true);
-      l(s + (u>>>0===u ? `U32=${u} I32=${i}` : `F32=${f.toFixed(6)}`), '', '#0ff');
-    } else if (o===8) l(s + `F64=${v.getFloat64(0,true).toFixed(6)}`, '', '#0ff');
-    else {
-      let p=0, a=[];
-      a.push(`U8=${v.getUint8(p++)}`); a.push(`I8=${v.getInt8(p++)}`);
-      a.push(`U16=${v.getUint16(p,true)}`); p+=2; a.push(`I16=${v.getInt16(p,true)}`); p+=2;
-      a.push(`U32=${v.getUint32(p,true)}`); p+=4; a.push(`I32=${v.getInt32(p,true)}`); p+=4;
-      a.push(`F32=${v.getFloat32(p,true).toFixed(5)}`); p+=4;
+let s = null;
+const init = (url) => {
+  if (s) s.close();
+  try { s = new Socket(url, l); s.on(onMsg); l('[INIT]', url, '#0f0'); }
+  catch (e) { l('FATAL', e.message, '#f00'); }
+};
+
+$connect.onclick = () => init($url.value.trim() || 'wss://echo.websocket.org');
+init($url.value);
+
+const send = (t,d) => { try { s.send(d); l(`→ ${t}`, typeof d==='object'?JSON.stringify(d):d, '#ff0'); } catch(e){ l('SEND ERR',e.message,'#f00'); }};
+const sendStr =()=>send('Str','Hello Mobile!');
+const sendNum =()=>send('Num',3.14);
+const sendObj =()=>send('Obj',{x:1,y:2});
+const sendArr =()=>send('Arr',[1,'a',true]);
+
+const sendBin =()=>{
+  const b=new ArrayBuffer(30),v=new DataView(b);let o=0;
+  v.setUint8(o++,255);v.setInt8(o++,-128);
+  v.setUint16(o,65535,true);o+=2;v.setInt16(o,-32768,true);o+=2;
+  v.setUint32(o,4294967295,true);o+=4;v.setInt32(o,-2147483648,true);o+=4;
+  v.setFloat32(o,3.14159,true);o+=4;v.setFloat64(o,-2.71828,true);o+=8;
+  s.send(b);l('→ Bin',`(${b.byteLength}B)`,'#ff0');
+};
+
+const sendU8 =()=>{const a=new Uint8Array([42]);s.send(a);l('→ U8',42,'#ff0');};
+const sendI8 =()=>{const a=new Int8Array([-99]);s.send(a);l('→ I8',-99,'#ff0');};
+const sendU16=()=>{const a=new Uint16Array([60000]);s.send(a);l('→ U16',60000,'#ff0');};
+const sendI16=()=>{const a=new Int16Array([-30000]);s.send(a);l('→ I16',-30000,'#ff0');};
+const sendU32=()=>{const a=new Uint32Array([4000000000]);s.send(a);l('→ U32',4000000000,'#ff0');};
+const sendI32=()=>{const a=new Int32Array([-2000000000]);s.send(a);l('→ I32',-2000000000,'#ff0');};
+const sendF32=()=>{const a=new Float32Array([1.234567]);s.send(a);l('→ F32',1.234567,'#ff0');};
+const sendF64=()=>{const a=new Float64Array([Math.E]);s.send(a);l('→ F64',Math.E,'#ff0');};
+
+function onMsg(d){
+  if(typeof d==='string')return l('← Str',d,'#0ff');
+  if(d instanceof ArrayBuffer){
+    const v=new DataView(d),len=d.byteLength;let str=`← Bin (${len}B): `;
+    if(len===1)str+=`U8=${new Uint8Array(d)[0]} I8=${new Int8Array(d)[0]}`;
+    else if(len===2){const u=v.getUint16(0,true),i=v.getInt16(0,true);str+=`U16=${u} I16=${i}`;}
+    else if(len===4){
+      const u=v.getUint32(0,true),i=v.getInt32(0,true),f=v.getFloat32(0,true);
+      str+=(u>>>0===u?`U32=${u} I32=${i}`:`F32=${f.toFixed(6)}`);
+    }else if(len===8)str+=`F64=${v.getFloat64(0,true).toFixed(6)}`;
+    else{
+      let p=0,a=[];
+      a.push(`U8=${v.getUint8(p++)}`);a.push(`I8=${v.getInt8(p++)}`);
+      a.push(`U16=${v.getUint16(p,true)}`);p+=2;a.push(`I16=${v.getInt16(p,true)}`);p+=2;
+      a.push(`U32=${v.getUint32(p,true)}`);p+=4;a.push(`I32=${v.getInt32(p,true)}`);p+=4;
+      a.push(`F32=${v.getFloat32(p,true).toFixed(5)}`);p+=4;
       a.push(`F64=${v.getFloat64(p,true).toFixed(5)}`);
-      l(s + a.join(' | '), '', '#0ff');
+      str+=a.join(' | ');
     }
-    return;
+    l(str,'','#0ff');return;
   }
-  try { l('← JSON', JSON.stringify(d), '#0ff'); } catch { l('← UNKNOWN', d, '#f00'); }
+  try{l('← JSON',JSON.stringify(d),'#0ff');}catch{l('← ???',d,'#f00');}
 }
 </script>
 </body></html>
