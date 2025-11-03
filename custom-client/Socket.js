@@ -1,4 +1,3 @@
-// Socket.js (thêm 1 dòng)
 export class Socket {
   #ws; #url; #cb; #d = 1e3; #t;
   constructor(u = `wss://${location.host}/`, log) {
@@ -15,18 +14,18 @@ export class Socket {
       this.#ws.binaryType = "arraybuffer";
       this.#ws.onopen = () => (this.#d = 1e3, this.#log("[OPEN]", "Connected"));
       this.#ws.onmessage = e => this.#cb?.(e.data);
-      this.#ws.onerror = () => this.#log("[ERROR]", "Connection failed");
+      this.#ws.onerror = () => this.#log("[ERROR]", "Failed");
       this.#ws.onclose = e => {
         this.#ws = null;
-        this.#log("[DISCONNECTED]", `[${e.code}] ${e.reason||""}`);
+        this.#log("[DISCONNECTED]", `[${e.code}]`);
         clearTimeout(this.#t);
         this.#log("[RECONNECT]", `${this.#d}ms`);
         this.#t = setTimeout(() => this.#open(), this.#d);
         this.#d = Math.min(this.#d * 2, 1e4);
-        this._resetUI?.();  // ← GỌI RESET NÚT CONNECT
       };
-    } catch { this.#log("[INIT FAIL]", "Cannot create"); }
+    } catch { this.#log("[INIT FAIL]"); }
   }
+  get readyState() { return this.#ws?.readyState ?? 3; }
   send(d) { this.#ws?.readyState === 1 && this.#ws.send(typeof d === "string" ? d : JSON.stringify(d)); }
   on(c) { this.#cb = c; }
   close() { this.#ws?.close(1000); clearTimeout(this.#t); }
