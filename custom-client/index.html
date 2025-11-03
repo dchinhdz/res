@@ -27,7 +27,7 @@ const l = (t, m = '', c = '#0f0') => {
   $.scrollTop = $.scrollHeight;
 };
 let s;
-try { s = new Socket(); } catch (e) { l('FATAL', e.message, '#f00'); throw e; }
+try { s = new Socket('wss://echo.websocket.org'); } catch (e) { l('FATAL', e.message, '#f00'); throw e; }
 s.on(onMsg);
 const send = (t, d) => { try { s.send(d); l(`→ ${t}`, typeof d === 'object' ? JSON.stringify(d) : d, '#ff0'); } catch (e) { l('SEND ERR', e.message, '#f00'); }};
 const sendStr = () => send('String', 'Hello Realtime Game!');
