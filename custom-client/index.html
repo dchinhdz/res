@@ -28,7 +28,7 @@
 <script type="module">
 import { Socket } from './Socket.js';
 
-const s = Socket.get();
+const s = Socket('wss://echo.websocket.org');
 s.on(onMsg);
 
 const $log = document.getElementById('log');
