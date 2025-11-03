@@ -1,14 +1,9 @@
 export class Socket {
-  static #i;
-  static get() { return Socket.#i || (Socket.#i = new Socket()); }
-
   #ws; #url; #cb; #d = 1e3; #t;
 
-  constructor(u = `wss://${location.host}/`) {
-    if (Socket.#i) throw 0;
-    this.#url = u;
+  constructor(url = `wss://${location.host}/`) {
+    this.#url = url;
     this.#open();
-    Socket.#i = this;
   }
 
   #open() {
