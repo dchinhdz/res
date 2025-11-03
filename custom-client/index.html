@@ -37,11 +37,11 @@ import { Socket } from './Socket.js';
 const $url=document.getElementById('url'),$close=document.getElementById('close'),$clear=document.getElementById('clear'),$log=document.getElementById('log');
 const l=(t,m='',c='#0f0')=>{const n=new Date().toISOString().slice(11,-1);$log.insertAdjacentHTML('beforeend',`<div style="color:${c}">[${n}] ${t} ${m}</div>`);$log.scrollTop=$log.scrollHeight;};
 let s=null;
-const init=()=>{if(s)s.close();try{s=new Socket($url.value.trim()||'wss://echo.websocket.org',l);s.on(onMsg);$close.disabled=false;l('[INIT]',$url.value,'#0f0');}catch(e){l('FATAL',e.message,'#f00');}};
-$close.onclick=()=>{if(s&&s.readyState<2){s.close();$close.disabled=true;l('[CLOSED BY USER]');}};
+const init=()=>{if(s)s.close();try{s=new Socket($url.value.trim()||'wss://echo.websocket.org',l);s.onopen=()=>$close.disabled=false;s.onclose=()=>$close.disabled=true;s.on(onMsg);l('[INIT]',$url.value,'#0f0');}catch(e){l('FATAL',e.message,'#f00');}};
+$close.onclick=()=>{if(s&&s.readyState<2){s.close();l('[CLOSED BY USER]');}};
 $clear.onclick=()=>$log.innerHTML='';
 init();
-const send=(t,d)=>{if(!s||s.readyState!==1)return l('DROP','Not connected','#f80');try{s.send(d);l(`→ ${t}`,typeof d==='object'?JSON.stringify(d):d,'#ff0');}catch(e){l('SEND ERR',e.message,'#f00');}};
+const send=(t,d)=>{if(!s||s.readyState!==1)return l('DROP','Not connected','#f80');try{s.send(d);l(`[SENT] → ${t}`,typeof d==='object'?JSON.stringify(d):d,'#ff0');}catch(e){l('SEND ERR',e.message,'#f00');}};
 const sendBin=()=>{const b=new ArrayBuffer(30),v=new DataView(b);let o=0;v.setUint8(o++,255);v.setInt8(o++,-128);v.setUint16(o,65535,true);o+=2;v.setInt16(o,-32768,true);o+=2;v.setUint32(o,4294967295,true);o+=4;v.setInt32(o,-2147483648,true);o+=4;v.setFloat32(o,3.14159,true);o+=4;v.setFloat64(o,-2.71828,true);o+=8;send('Bin',b);};
 const sendU8=()=>send('U8',new Uint8Array([42]));
 const sendI8=()=>send('I8',new Int8Array([-99]));
@@ -51,6 +51,6 @@ const sendU32=()=>send('U32',new Uint32Array([4000000000]));
 const sendI32=()=>send('I32',new Int32Array([-2000000000]));
 const sendF32=()=>send('F32',new Float32Array([1.234567]));
 const sendF64=()=>send('F64',new Float64Array([Math.E]));
-function onMsg(d){if(typeof d==='string')return l('← Str',d,'#0ff');if(d instanceof ArrayBuffer){const v=new DataView(d),len=d.byteLength;let str=`← Bin (${len}B): `;if(len===1)str+=`U8=${new Uint8Array(d)[0]} I8=${new Int8Array(d)[0]}`;else if(len===2){const u=v.getUint16(0,true),i=v.getInt16(0,true);str+=`U16=${u} I16=${i}`;}else if(len===4){const u=v.getUint32(0,true),i=v.getInt32(0,true),f=v.getFloat32(0,true);str+=(u>>>0===u?`U32=${u} I32=${i}`:`F32=${f.toFixed(6)}`);}else if(len===8)str+=`F64=${v.getFloat64(0,true).toFixed(6)}`;else{let p=0,a=[];a.push(`U8=${v.getUint8(p++)}`);a.push(`I8=${v.getInt8(p++)}`);a.push(`U16=${v.getUint16(p,true)}`);p+=2;a.push(`I16=${v.getInt16(p,true)}`);p+=2;a.push(`U32=${v.getUint32(p,true)}`);p+=4;a.push(`I32=${v.getInt32(p,true)}`);p+=4;a.push(`F32=${v.getFloat32(p,true).toFixed(5)}`);p+=4;a.push(`F64=${v.getFloat64(p,true).toFixed(5)}`);str+=a.join(' | ');}l(str,'','#0ff');return;}try{l('← JSON',JSON.stringify(d),'#0ff');}catch{l('← ???',d,'#f00');}}
+function onMsg(d){l('[RECEIVED]');if(typeof d==='string')return l('← Str',d,'#0ff');if(d instanceof ArrayBuffer){const v=new DataView(d),len=d.byteLength;let str=`← Bin (${len}B): `;if(len===1)str+=`U8=${new Uint8Array(d)[0]} I8=${new Int8Array(d)[0]}`;else if(len===2){const u=v.getUint16(0,true),i=v.getInt16(0,true);str+=`U16=${u} I16=${i}`;}else if(len===4){const u=v.getUint32(0,true),i=v.getInt32(0,true),f=v.getFloat32(0,true);str+=(u>>>0===u?`U32=${u} I32=${i}`:`F32=${f.toFixed(6)}`);}else if(len===8)str+=`F64=${v.getFloat64(0,true).toFixed(6)}`;else{let p=0,a=[];a.push(`U8=${v.getUint8(p++)}`);a.push(`I8=${v.getInt8(p++)}`);a.push(`U16=${v.getUint16(p,true)}`);p+=2;a.push(`I16=${v.getInt16(p,true)}`);p+=2;a.push(`U32=${v.getUint32(p,true)}`);p+=4;a.push(`I32=${v.getInt32(p,true)}`);p+=4;a.push(`F32=${v.getFloat32(p,true).toFixed(5)}`);p+=4;a.push(`F64=${v.getFloat64(p,true).toFixed(5)}`);str+=a.join(' | ');}l(str,'','#0ff');return;}try{l('← JSON',JSON.stringify(d),'#0ff');}catch{l('← ???',d,'#f00');}}
 </script>
 </body></html>
