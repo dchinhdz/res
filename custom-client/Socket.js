@@ -26,7 +26,12 @@ export class Socket {
     } catch { this.#log("[INIT FAIL]"); }
   }
   get readyState() { return this.#ws?.readyState ?? 3; }
-  send(d) { this.#ws?.readyState === 1 && this.#ws.send(typeof d === "string" ? d : JSON.stringify(d)); }
+  send(d) {
+    if (this.#ws?.readyState !== 1) return;
+    if (typeof d === 'string') this.#ws.send(d);
+    else if (d instanceof ArrayBuffer || ArrayBuffer.isView(d)) this.#ws.send(d);
+    else this.#ws.send(JSON.stringify(d));
+  }
   on(c) { this.#cb = c; }
   close() { this.#ws?.close(1000); clearTimeout(this.#t); }
 }
