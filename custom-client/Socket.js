@@ -1,5 +1,5 @@
 export class Socket {
-  #ws; #url; #cb; #d = 1e3; #t;
+  #ws; #url; #cb; #d = 1e3; #t; onopen = () => {}; onclose = () => {};
   constructor(u = `wss://${location.host}/`, log) {
     if (!window.WebSocket) throw new Error("No WebSocket");
     this.#url = u; this.#log = log; this.#open();
@@ -12,7 +12,7 @@ export class Socket {
     try {
       this.#ws = new WebSocket(this.#url);
       this.#ws.binaryType = "arraybuffer";
-      this.#ws.onopen = () => (this.#d = 1e3, this.#log("[OPEN]", "Connected"));
+      this.#ws.onopen = () => (this.#d = 1e3, this.#log("[OPEN]", "Connected"), this.onopen());
       this.#ws.onmessage = e => this.#cb?.(e.data);
       this.#ws.onerror = () => this.#log("[ERROR]", "Failed");
       this.#ws.onclose = e => {
@@ -22,6 +22,7 @@ export class Socket {
         this.#log("[RECONNECT]", `${this.#d}ms`);
         this.#t = setTimeout(() => this.#open(), this.#d);
         this.#d = Math.min(this.#d * 2, 1e4);
+        this.onclose();
       };
     } catch { this.#log("[INIT FAIL]"); }
   }
