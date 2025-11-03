@@ -12,7 +12,7 @@ export class Socket {
       this.ws.onopen = () => console.log('Connected!');
       this.ws.onmessage = (e) => console.log(e.message); //welcome to...
       this.ws.onerror = (e) => console.error(`Error: ${e.target}`);
-      this.ws.onclose = (e) => console.log(`Closed: ${e.code} - ${e.reason}`);
+      this.ws.onclose = (e) => console.log(`Closed: [${e.code}] ${e.reason}`);
     } catch {
       console.error('Error: Not Connect to Server');
     } finally {
@@ -20,7 +20,7 @@ export class Socket {
     }
   }
   #clean () {
-    if (!this.ws) return;
+    if (!this.ws) return console.error('Not Clean');
     this.ws.onopen = null;
     this.ws.onmessage = null;
     this.ws.onerror = null;
@@ -28,9 +28,22 @@ export class Socket {
     this.ws.close();
     this.ws = null;
   }
+  #handle(event) {
+    
+  }
   async connect() {
     if (this.ws.readyState === 1) return console.error('Error: Server is running');
     await this.#clean();
     this.#open();
-  }  
+  }
+  send(data) {
+    this.ws.send(data);
+  }
+  on(callback) {
+    this.ws.addEventListinener("message", callback(this.#handle));
+  }
+  async close(code = 1000, message = "Server closed") {
+    if (!this.ws) return console.error('Not Close');
+    await this.#clean();
+    console.log(`Closed: [${code}] ${message}`);
 }
