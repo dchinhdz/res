@@ -6,15 +6,15 @@ export class Socket {
     this.#open();
   }
   #open () {
-    if (this.ws.readyState < 3) return;
+    if (this.ws && this.ws.readyState < 2) return;
     this.#clean();
     this.ws = new WebSocket(this.url);
     this.ws.binaryType = "arraybuffer";
   }
   #clean () {
     if (!this.ws) return;
-    this.ws.close();
-    this.ws = null;
+    if (this.ws.readyState < 2) this.ws.close();
+    if (this.ws) this.ws = null;
   }
     
   autoConnect() {
