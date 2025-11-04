@@ -12,7 +12,9 @@ export class Socket {
     this.ws.binaryType = "arraybuffer";
   }
   #clean () {
-    this.ws = this.ws && (this.ws.close(), null);
+    if (!this.ws) return;
+    this.ws.close();
+    this.ws = null;
   }
     
   autoConnect() {
@@ -22,7 +24,6 @@ export class Socket {
     }, this.delay);
   }
   close() {
-    if (!this.ws || this.ws.readyState > 1) return;
     this.#clean();
   }
   addEventListener(...args) {
