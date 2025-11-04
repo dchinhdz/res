@@ -6,7 +6,7 @@ export class Socket {
     this.#open();
   }
   #open () {
-    if (this.ws) return;
+    if (this.ws && this.readyState < 3) return;
     this.#clean();
     this.ws = new WebSocket(this.url);
     this.ws.binaryType = "arraybuffer";
@@ -22,7 +22,13 @@ export class Socket {
     }, this.delay);
   }
   close() {
-    if (this.ws.readyState > 1) return;
+    if (!this.ws && this.ws.readyState > 1) return;
     this.#clean();
+  }
+  addEventListener(...args) {
+    this.ws.addEventListener(...args);
+  }
+  on(event, callback) {
+    this.ws["on"+event] = callback;
   }
 }
