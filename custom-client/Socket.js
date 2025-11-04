@@ -1,11 +1,17 @@
 export class Socket {
-  static instance;
   constructor(url) {
-    if (Socket.instance) return Socket.instance;
     this.ws = null;
     this.url = url || `wss://${location.host}/`;
-    this.status = null;
-    Socket.instance = this;
+    this.#open;
   }
-  
+  #open () {
+    if (this.ws) return;
+    this.ws = new WebSocket(this.url);
+  }
+  #clean () {
+    try {
+      this.ws.close();
+    } catch {
+      this.ws.onopen = this.ws.onmessage = this.ws.onerror = this.onclose = null;
+    }
 }
