@@ -10,6 +10,8 @@ export class Socket {
     this.#clean();
     this.ws = new WebSocket(this.url);
     this.ws.binaryType = "arraybuffer";
+    this.on("open", () => this.delay = 1000);
+    this.on("close", () => this.autoConnect());
   }
   #clean () {
     if (this.ws && this.ws.readyState < 2) this.ws.close();
@@ -19,7 +21,7 @@ export class Socket {
   autoConnect() {
     setTimeout(() => {
         this.#open();
-        this.delay = Math.min(this.delay * 2, 30000);
+        this.delay = Math.min(this.delay * 2, 10000);
     }, this.delay);
   }
   close() {
