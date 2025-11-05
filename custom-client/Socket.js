@@ -1,39 +1,52 @@
 export class Socket {
   constructor(url) {
-    this.ws = null;
-    this.delay = 1000;
     this.url = url || `wss://${location.host}/`;
-    this.#open();
+    this.delay = 1000;
+    this.handlers = { open: [], close: [], message: [], error: [] };
+    this.#connect();
   }
-  #open () {
-    if (this.ws && this.ws.readyState < 2) return;
-    this.#clean();
+
+  #connect() {
+    if (this.ws?.readyState < 2) return;
+    this.#cleanup();
     this.ws = new WebSocket(this.url);
     this.ws.binaryType = "arraybuffer";
-    this.on("open", () => this.delay = 1000);
-    this.on("close", () => this.autoConnect());
+    this.ws.onopen = () => {
+      this.delay = 1000;
+      this.handlers.open.forEach(h => h());
+    };
+    this.ws.onclose = () => {
+      this.handlers.close.forEach(h => h());
+      this.#reconnect();
+    };
+    this.ws.onmessage = e => this.handlers.message.forEach(h => h(e));
+    this.ws.onerror = e => this.handlers.error.forEach(h => h(e));
   }
-  #clean () {
-    if (this.ws && this.ws.readyState < 2) this.ws.close();
-    if (this.ws) this.ws = null;
+
+  #cleanup() {
+    if (this.ws) {
+      this.ws.onopen = this.ws.onclose = this.ws.onmessage = this.ws.onerror = null;
+      if (this.ws.readyState < 2) this.ws.close();
+      this.ws = null;
+    }
   }
-    
-  autoConnect() {
+
+  #reconnect() {
     setTimeout(() => {
-        this.#open();
-        this.delay = Math.min(this.delay * 2, 10000);
+      this.#connect();
+      this.delay = Math.min(this.delay * 2, 10000);
     }, this.delay);
   }
-  close() {
-    this.#clean();
+
+  on(event, cb) {
+    if (this.handlers[event]) this.handlers[event].push(cb);
   }
-  addEventListener(...args) {
-    this.ws.addEventListener(...args);
-  }
-  on(event, callback) {
-    this.ws["on"+event] = callback;
-  }
+
   emit(data) {
-    this.ws.send(data);
+    this.ws?.readyState === 1 && this.ws.send(data);
+  }
+
+  close() {
+    this.#cleanup();
   }
 }
