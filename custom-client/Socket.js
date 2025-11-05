@@ -12,8 +12,7 @@ export class Socket {
     this.ws.binaryType = "arraybuffer";
   }
   #clean () {
-    if (!this.ws) return;
-    if (this.ws.readyState < 2) this.ws.close();
+    if (this.ws && this.ws.readyState < 2) this.ws.close();
     if (this.ws) this.ws = null;
   }
     
