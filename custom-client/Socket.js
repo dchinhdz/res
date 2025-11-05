@@ -32,4 +32,7 @@ export class Socket {
   on(event, callback) {
     this.ws["on"+event] = callback;
   }
+  emit(data) {
+    this.ws.send(data);
+  }
 }
