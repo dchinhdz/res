@@ -40,12 +40,12 @@ export class Socket {
     }, this.delay);
   }
 
-  on(event, cb) {
-    if (this.handlers[event]) this.handlers[event].push(cb);
+  on(e, c) {
+    if (this.handlers[e]) this.handlers[e].push(c);
   }
 
-  emit(data) {
-    this.ws?.readyState === 1 && this.ws.send(data);
+  emit(d) {
+    this.ws?.readyState === 1 && this.ws.send(d);
   }
 
   close() {
