@@ -1,20 +1,40 @@
 export class Act {
-  _buffer(c, n) {
-    const buffer = new ArrayBuffer(n+1);
+  static _buffer(c, n) {
+    const buffer = new ArrayBuffer(n+2);
     const q = new DataView(buffer);
-    q.setUint8(0, c);//channel
+    q.setUint16(0, c, true);//channel
     return q;
   }
-  move(map, x, y) {
+  static move(map, x, y) {
     const q = this._buffer(1,9);
-    q.setUint8(1, map);//id map
-    q.setFloat32(2, x, true);
-    q.setFloat32(6, y, true);
+    q.setUint8(2, Number(map));//id map
+    q.setFloat32(3, x, true);
+    q.setFloat32(7, y, true);
     return q.buffer;
   }
-  cmd(c, id) {
+  static cmd(c, id) {
     const q = this._buffer(c, 2);
-    q.setUint16(1, id, true);//id
+    q.setUint16(2, Number(id), true);//id
     return q.buffer;
+  }
+  static str(c, id,  str) {
+    const t = new TextEncoder().encode(str);
+    const q = this._buffer(c, t.length+2);
+    q.setUint16(2, Number(id), true);
+    for (let i=0;i<t.length;i++) {
+      q.setUint8(i+2, t[i]);
+    }
+    return q.buffer;
+  }
+  static onMove(data) {
+    if (!(data instanceof ArrayBuffer)) return;
+    const q = new DataView(data);
+    let arr = {};
+    arr.channel = q.getUint16(0, true);
+    arr.mapId = q.getUint8(2);
+    arr.x = q.getFloat32(3, true);
+    arr.y = q.getFloat32(7, true);
+    arr.userId = q.getUint16(11, true);
+    return arr;
   }
 }
