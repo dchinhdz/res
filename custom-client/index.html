@@ -11,14 +11,14 @@
       const nav = document.getElementById("log");
       function log(text) {
         let li = document.createElement("li");
-        li.textContent = text;
+        li.textContent = `📩 ${text}`;
         nav.appendChild(li);
       }
       ws.on("open", () => log('✅ CONNECTED!');
       ws.on("error", () => log('⚠️ ERROR!');
       ws.on("close", () => log('❌ DISCONNECT!');
       ws.on("message", (e) => {
-        log(e.data);
+        log('REVICE: '+e.data);
         });
     </script>
   </body>
