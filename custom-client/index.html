@@ -13,7 +13,7 @@
       import {Socket} from './Socket.js';
       //import {Act} from './Act.js';
       try {
-        const ws = Socket('wss://echo.websocket.org');
+        const ws = new Socket('wss://echo.websocket.org');
       } catch {
         log('Syntax Error: Not Connect Websocket!');
       }
