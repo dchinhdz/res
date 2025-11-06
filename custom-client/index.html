@@ -1,1 +1,25 @@
-
+<html>
+  <head>
+    <title>TEST CLIENT</title>
+  </head>
+  <body>
+    <nav id="log"></nav>
+    <script type="module">
+      import {Socket} from './Socket.js';
+      import {Atc} from './Atc.js';
+      const ws = Socket('wss://echo.websocket.org');
+      const nav = document.getElementById("log");
+      function log(text) {
+        let li = document.createElement("li");
+        li.textContent = text;
+        nav.appendChild(li);
+      }
+      ws.on("open", () => log('✅ CONNECTED!');
+      ws.on("error", () => log('⚠️ ERROR!');
+      ws.on("close", () => log('❌ DISCONNECT!');
+      ws.on("message", (e) => {
+        log(e.data);
+        });
+    </script>
+  </body>
+</html>
