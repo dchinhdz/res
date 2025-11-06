@@ -3,21 +3,45 @@
     <title>TEST CLIENT</title>
     <style>
       * {margin: 10px;background-color: #000;color:#fff}
-      #log {border: 4px solid #ff0}
+      #log {border: 4px solid #ff0;scroll-y: scroll;max-height: 50vh}
     </style>
   </head>
   <body>
     <h2>TEST WEBSOCKET</h2>
     <div id="log"></div>
+    <button type="button" onclick="clear();">CLEAR</button>
+    <button type="button" onclick="emit('str');">STRING</button>
+    <button type="button" onclick="emit('obj');">OBJECT</button>
+    <button type="button" onclick="emit('bin');">BINARY</button>
+    <button type="button" onclick="emit('move');">MOVE</button>
+    <button type="button" onclick="emit('cmd');">CMD</button>
     <script type="module">
       import {Socket} from './Socket.js';
-      //import {Act} from './Act.js';
+      import {Act} from './Act.js';
       const ws = new Socket('wss://echo.websocket.org');
       const div = document.getElementById("log");
       function log(text) {
         let iv = document.createElement("div");
         iv.textContent = `📩 ${text}`;
         div.appendChild(iv);
+      }
+      function clear() {
+        div.innerHTML = '';
+      }
+      function emit(type) {
+        if (type === 'move') {
+          ws.emit(Act.move(10, 133.4, 23.6));
+        } else if(type === 'obj') {
+          ws.emit(JSON.stringify({a: 1, b: 2}));
+        } else if(type === 'str') {
+          ws.emit('Hello String!');
+        } else if(type === 'bin') {
+          ws.emit(Act.str(20, 'Hello Bytes'));
+        } else if(type === 'cmd') {
+          ws.emit(Act.cmd(30, 5351));
+        } else {
+          log('Dữ liệu gửi không đúng!');
+        }
       }
       try {
         ws.on("open", () => log('✅ CONNECTED!'));
