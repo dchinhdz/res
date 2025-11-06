@@ -7,17 +7,12 @@
     </style>
   </head>
   <body>
-    <h2>TEST WEBSOCKET 2</h2>
+    <h2>TEST WEBSOCKET</h2>
     <div id="log"></div>
     <script type="module">
       import {Socket} from './Socket.js';
       //import {Act} from './Act.js';
-      try {
-        const ws = new Socket('wss://echo.websocket.org');
-        log('Success: Websocket On!');
-      } catch {
-        log('Syntax Error: Not Connect Websocket!');
-      }
+      const ws = new Socket('wss://echo.websocket.org');
       const div = document.getElementById("log");
       function log(text) {
         let iv = document.createElement("div");
@@ -26,7 +21,7 @@
       }
       try {
         ws.on("open", () => log('✅ CONNECTED!'));
-        ws.on("error", () => log('⚠️ ERROR!'));
+        ws.on("error", (e) => log('⚠️ ERROR!'));
         ws.on("close", () => log('❌ DISCONNECT!'));
         ws.on("message", (e) => {
           log('RECEIVE: '+e.data);
