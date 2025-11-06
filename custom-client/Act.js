@@ -5,13 +5,12 @@ export class Act {
     q.setUint16(0, c, true);//channel
     return q;
   }
-  static _instanceof(d) {
-    if (!(d instanceof ArrayBuffer)) return;
-    return new DataView(d); 
-  }
-  static _channel() {
-    let a = {};
-    return a.channel = q.getUint16(0, true);
+  static _bytes(d) {
+    let a = {g: {}, q: {}};
+    a.q = new DataView(d);
+    a.g.channel = a.q.getUint16(0, true);
+    a.g.userId = a.q.getUint16(2, true);
+    return a;
   }
   static move(map, x, y) {
     const q = this._buffer(1,9);
@@ -35,23 +34,24 @@ export class Act {
     return q.buffer;
   }
   static onMove(data) {
-    if (this._instanceof(data)) reutrn;
-    let arr = this._channal();
-    arr.mapId = q.getUint8(2);
-    arr.x = q.getFloat32(3, true);
-    arr.y = q.getFloat32(7, true);
-    arr.userId = q.getUint16(11, true);
-    return arr;
+    if (!(data instanceof ArrayBuffer)) reutrn;
+    let a = this._bytes(data);
+    a.g.mapId = q.getUint8(4);
+    a.g.x = a.q.getFloat32(5, true);
+    a.g.y = a.q.getFloat32(9, true);
+    return a.g;
   }
   static onStr(data) {
-    if (this._instanceof(data)) return;
-    let arr = this._channel();
-    arr.userId = q.getUint16(2, true);
-    const t = new Uint8Array(q.slice(4));
-    arr.str = new TextDecoder("utf-8").decode(t);
-    return arr;
+    if (!(data instanceof ArrayBuffer)) reutrn;
+    let a = this._bytes(data);
+    const t = new Uint8Array(a.q.slice(4));
+    a.g.str = new TextDecoder("utf-8").decode(t);
+    return a.g;
   }
   static onCmd(data) {
-    return;
+    if (!(data instanceof ArrayBuffer)) reutrn;
+    let a = this._bytes(data);
+    a.g.data = a.q.slice(4);
+    return a.g;
   }
 }
