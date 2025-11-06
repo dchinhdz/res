@@ -37,4 +37,14 @@ export class Act {
     arr.userId = q.getUint16(11, true);
     return arr;
   }
+  static onStr(data) {
+    if (!(data instanceof ArrayBuffer)) return;
+    const q = new DataView(data);
+    let arr = {};
+    arr.channel = q.getUint16(0, true);
+    arr.userId = q.getUint16(2, true);
+    const t = new Uint8Array(q.slice(4));
+    arr.str = new TextDecoder("utf-8").decode(t);
+    return arr;
+  }
 }
