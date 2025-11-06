@@ -14,12 +14,16 @@
         li.textContent = `📩 ${text}`;
         nav.appendChild(li);
       }
-      ws.on("open", () => log('✅ CONNECTED!');
-      ws.on("error", () => log('⚠️ ERROR!');
-      ws.on("close", () => log('❌ DISCONNECT!');
-      ws.on("message", (e) => {
-        log('REVICE: '+e.data);
+      try {
+        ws.on("open", () => log('✅ CONNECTED!'));
+        ws.on("error", () => log('⚠️ ERROR!'));
+        ws.on("close", () => log('❌ DISCONNECT!'));
+        ws.on("message", (e) => {
+          log('RECEIVE: '+e.data);
         });
+      } catch (e) {
+        log('Syntax Error...'+e); 
+      }
     </script>
   </body>
 </html>
