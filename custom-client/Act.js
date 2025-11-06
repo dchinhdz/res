@@ -25,7 +25,9 @@ export class Act {
   static str(channel, string) {
     const str = new TextEncoder().encode(string);
     const emit = this._emit(channel, str.length);
-    emit.forEach((bytes, i) => emit.setUint8(2+i, bytes));
+    for (let i=0;i<str.length;i++) {
+      emit.setUint8(2+i, str[i]));
+    }
     return emit.buffer;
   }
   //=== TYPE CHECK ===
@@ -59,10 +61,10 @@ export class Act {
   }
   static onStr(data) {
     let on = this._on(data);
-    const str = new Uint8Array(on.get.buffer.slice(4));
     on.set.userId = on.get.getUint16(2, true);
+    const str = new Uint8Array(on.get.buffer.slice(4));
     on.set.text = new TextDecoder("utf-8").decode(str);
-    return a.set;
+    return on.set;
   }
   static onCmd(data) {
     let on = this._on(data);
