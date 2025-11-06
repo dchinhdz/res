@@ -74,4 +74,7 @@ export class Act {
     on.set.data = on.get.buffer.slice(4);
     return on.set;
   }
+  static onObj(data) {
+    return JSON.parse(data);
+  }
 }
