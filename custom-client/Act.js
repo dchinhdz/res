@@ -8,21 +8,38 @@ export class Act {
   static _on(d) {
     if (!(d instanceof ArrayBuffer) || d.byteLength < 4) return null;
     let a = {g: {}, q: new DataView(d)};
-    a.g = {channel: a.q.getUint16(0, true), userId = a.q.getUint16(2, true)};
+    a.g = {channel: a.q.getUint16(0, true), userId: a.q.getUint16(2, true)};
     return a;
   }
+  //=== EMIT/SEND ===
   static move(map, x, y) {
-    const q = this._buffer(1,9);
+    const q = this._emit(1,9);
     q.setUint8(4, Number(map));//id map
     q.setFloat32(5, x, true);
     q.setFloat32(9, y, true);
     return q.buffer;
   }
   static cmd(c, id) {
-    const q = this._buffer(c, 2);
+    const q = this._emit(c, 2);
     q.setUint16(4, Number(id), true);//id
     return q.buffer;
   }
+  //=== TYPE CHECK ===
+  static isObject(v) {
+    try {
+      return typeof v === "string" && !!(v = JSON.parse(v)) && v.constructor === Object;
+    } catch {
+      return false;
+    }
+  }
+  static isBinary(v) {
+    try {
+      return v instanceof ArrayBuffer || ArrayBuffer.isView(v);
+    } catch {
+      return false;
+    }
+  }
+  //=== REVICE/ON ===
   static str(c, id,  str) {
     const t = new TextEncoder().encode(str);
     const q = this._buffer(c, t.length+2);
