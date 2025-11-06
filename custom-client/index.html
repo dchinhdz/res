@@ -12,7 +12,11 @@
     <script type="module">
       import {Socket} from './Socket.js';
       //import {Act} from './Act.js';
-      const ws = Socket('wss://echo.websocket.org');
+      try {
+        const ws = Socket('wss://echo.websocket.org');
+      } catch {
+        log('Syntax Error: Not Connect Websocket!');
+      }
       const div = document.getElementById("log");
       function log(text) {
         let iv = document.createElement("div");
@@ -26,8 +30,8 @@
         ws.on("message", (e) => {
           log('RECEIVE: '+e.data);
         });
-      } catch (e) {
-        log('Syntax Error...'+e); 
+      } catch {
+        log('Syntax Error...'); 
       }
     </script>
   </body>
