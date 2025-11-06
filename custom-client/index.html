@@ -7,7 +7,7 @@
     </style>
   </head>
   <body>
-    <h2>TEST WEBSOCKET</h2>
+    <h2>TEST WEBSOCKET //</h2>
     <div id="log"></div>
     <button type="button" onclick="clear();">CLEAR</button>
     <button type="button" onclick="emit('str');">STRING</button>
@@ -27,6 +27,7 @@
       }
       function clear() {
         div.innerHTML = '';
+        log('clean log...');
       }
       function emit(type) {
         if (type === 'move') {
