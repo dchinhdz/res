@@ -26,14 +26,16 @@ export class Act {
     const str = new TextEncoder().encode(string);
     const emit = this._emit(channel, str.length);
     for (let i=0;i<str.length;i++) {
-      emit.setUint8(2+i, str[i]));
+      emit.setUint8(2+i, str[i]);
     }
     return emit.buffer;
   }
   //=== TYPE CHECK ===
   static isObject(data) {
+    if (typeof data !== "string") return false;
     try {
-      return typeof data === "string" && !!(data = JSON.parse(data)) && data.constructor === Object;
+      const obj = JSON.parse(data);
+      return obj && obj.constructor === Object;
     } catch {
       return false;
     }
