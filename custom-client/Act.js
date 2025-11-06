@@ -1,54 +1,57 @@
 export class Act {
-  static _emit(c, n) {
-    const a = new ArrayBuffer(4+n);
-    const d = new DataView(a);
-    d.setUint16(0, c, true);//channel
-    return d;
+  static _emit(channel, bytes) {
+    const buffer = new ArrayBuffer(2+bytes);
+    const emit = new DataView(buffer);
+    emit.setUint16(0, channel, true);//channel
+    return emit;
   }
-  static _on(d) {
-    if (!(d instanceof ArrayBuffer) || d.byteLength < 4) return null;
-    let a = {g: {}, q: new DataView(d)};
-    a.g = {channel: a.q.getUint16(0, true), userId: a.q.getUint16(2, true)};
-    return a;
+  static _on(data) {
+    if (data.byteLength < 3) return null;
+    let obj = {set: {}, on: new DataView(data)};
+    obj.set = {channel: obj.on.getUint16(0, true), userId: obj.on.getUint16(2, true)};
+    return obj;
   }
   //=== EMIT/SEND ===
   static move(map, x, y) {
-    const q = this._emit(1,9);
-    q.setUint8(4, Number(map));//id map
-    q.setFloat32(5, x, true);
-    q.setFloat32(9, y, true);
-    return q.buffer;
+    const emit = this._emit(1,9);
+    emit.setUint8(2, Number(map));//id map
+    emit.setFloat32(3, x, true);
+    emit.setFloat32(7, y, true);
+    return emit.buffer;
   }
-  static cmd(c, id) {
-    const q = this._emit(c, 2);
-    q.setUint16(4, Number(id), true);//id
-    return q.buffer;
+  static cmd(channel, cmd) {
+    const emit = this._emit(channel, 2);
+    emit.setUint16(2, Number(cmd), true);//cmd-id
+    return emit.buffer;
+  }
+  static str(channel, string) {
+    const str = new TextEncoder().encode(string);
+    const emit = this._emit(channel, str.length);
+    emit.forEach((bytes, i) => emit.setUint8(2+i, bytes));
+    return emit.buffer;
   }
   //=== TYPE CHECK ===
-  static isObject(v) {
+  static isObject(data) {
     try {
-      return typeof v === "string" && !!(v = JSON.parse(v)) && v.constructor === Object;
+      return typeof data === "string" && !!(data = JSON.parse(data)) && data.constructor === Object;
     } catch {
       return false;
     }
   }
-  static isBinary(v) {
+  static isBinary(data) {
     try {
-      return v instanceof ArrayBuffer || ArrayBuffer.isView(v);
+      return data instanceof ArrayBuffer || ArrayBuffer.isView(data);
     } catch {
       return false;
     }
+  }
+  //=== CHANNEL CHECK ===
+  static getChannel(data) {
+    
   }
   //=== REVICE/ON ===
-  static str(c, id,  str) {
-    const t = new TextEncoder().encode(str);
-    const q = this._buffer(c, t.length+2);
-    q.setUint16(4, Number(id), true);
-    t.forEach((b, i) => q.setUint8(6 + i, b));
-    return q.buffer;
-  }
   static onMove(data) {
-    let a = this._parse(data);
+    let a = this._on(data);
     if (!a || a.g.channel !== 1) return null;
     a.g.mapId = a.q.getUint8(4);
     a.g.x = a.q.getFloat32(5, true);
@@ -56,7 +59,7 @@ export class Act {
     return a.g;
   }
   static onStr(data) {
-    let a = this._parse(data);
+    let a = this._on(data);
     if !a return null;
     const t = new Uint8Array(a.q.buffer.slice(4));
     a.g.str = new TextDecoder("utf-8").decode(t);
@@ -64,7 +67,7 @@ export class Act {
   }
   static onCmd(data) {
     if (!(data instanceof ArrayBuffer)) return;
-    let a = this._bytes(data);
+    let a = this._on(data);
     a.g.data = a.q.buffer.slice(4);
     return a.g;
   }
