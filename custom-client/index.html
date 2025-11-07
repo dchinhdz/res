@@ -9,12 +9,12 @@
   <body>
     <h2>TEST WEBSOCKET //</h2>
     <div id="log"></div>
-    <button type="button" onclick="clear();">CLEAR</button>
-    <button type="button" onclick="emit('str');">STRING</button>
-    <button type="button" onclick="emit('obj');">OBJECT</button>
-    <button type="button" onclick="emit('bin');">BINARY</button>
-    <button type="button" onclick="emit('move');">MOVE</button>
-    <button type="button" onclick="emit('cmd');">CMD</button>
+    <button type="button" onclick="clearLog();">CLEAR</button>
+    <button type="button" onclick="emitS('str');">STRING</button>
+    <button type="button" onclick="emitS('obj');">OBJECT</button>
+    <button type="button" onclick="emitS('bin');">BINARY</button>
+    <button type="button" onclick="emitS('move');">MOVE</button>
+    <button type="button" onclick="emitS('cmd');">CMD</button>
     <script type="module">
       import {Socket} from './Socket.js';
       import {Act} from './Act.js';
@@ -25,11 +25,12 @@
         iv.textContent = `📩 ${text}`;
         div.appendChild(iv);
       }
-      function clear() {
+      function clearLog() {
         div.innerHTML = '';
         log('clean log...');
       }
-      function emit(type) {
+      function emitS(type) {
+        if (ws.readyState !== 1) return log('Websocket chưa sẵn sàng!);
         if (type === 'move') {
           ws.emit(Act.move(10, 133.4, 23.6));
           log('EMIT: MOVE');
