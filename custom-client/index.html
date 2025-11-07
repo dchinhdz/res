@@ -7,7 +7,7 @@
     </style>
   </head>
   <body>
-    <h2>TEST WEBSOCKET @</h2>
+    <h2>TEST WEBSOCKET 🐦</h2>
     <div id="log"></div>
     <button type="button" onclick="statusCheck();">STATUS</button>
     <button type="button" onclick="clearLog();">CLEAR</button>
@@ -65,7 +65,7 @@
             if (channel === 1) {
                log('RE MOVE: '+R.s(A.M(e.data)));
              } else if(channel === 20) {
-               log('RE BINARY STRING: '+R.s(A.S(e.data))+` => ${R.s(A.S(e.data))}`);
+               log('RE BINARY STRING: '+R.s(A.S(e.data))+` => ${R.b(A.S(e.data))}`);
              } else if(channel === 30) {
                log('RE CMD: '+R.s(A.C(e.data)));
              } else {log('Channel không hợp lệ');}
