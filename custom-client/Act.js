@@ -58,8 +58,8 @@ export class Act {
     let on = this._on(data);
     on.set.userId = on.get.getUint16(2, true);
     on.set.mapId = on.get.getUint8(4);
-    on.set.x = on.get.getFloat32(5, true);
-    on.set.y = on.get.getFloat32(9, true);
+    on.set.x = +on.get.getFloat32(5, true).toFixed(2);
+    on.set.y = +on.get.getFloat32(9, true).toFixed(2);
     return on.set;
   }
   static onStr(data) {
