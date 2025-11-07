@@ -51,7 +51,7 @@ export class A {
   //=== GET CHANNEL ===
   static gC(a) {
     if (a.byteLength < 4) return null;
-    return this._o(a).set[0];
+    return this._o(a).s[0];
   }
   //=== REVICE/ON ===
   static M(a) {
