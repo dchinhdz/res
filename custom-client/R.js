@@ -1,7 +1,8 @@
 export class R {
-  static s = (s) => JSON.stringify(s);
-  static c = (c) => Array.isArray(c) ? c[0] : c?.channel ?? null;
-  static u = (u) => Array.isArray(u) ? u[1] : u?.userId ?? null;
-  static m = (m) => ({userId: m[1],  map: m[2], x: m[3], y: m[4]});
-  static b = (b) => b[2] ?? null;
+  static s = (r) => JSON.stringify(r);
+  static p = (r) => JSON.parse(r);
+  static c = (r) => Array.isArray(r) ? r[0] : r?.channel ?? null;
+  static u = (r) => Array.isArray(r) ? r[1] : r?.userId ?? null;
+  static m = (r) => ({userId: r[1],  map: r[2], x: r[3], y: r[4]});
+  static b = (r) => r[2] ?? null;
 }
