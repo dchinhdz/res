@@ -8,7 +8,7 @@ export class Act {
   }
   static _on(data) {
     const get = new DataView(data);
-    return {get, set: {channel: get.getUint16(0, true)}};
+    return {get, set: [get.getUint16(0, true)]};
   }
   //=== EMIT/SEND ===
   static move(map, x, y) {
@@ -51,28 +51,28 @@ export class Act {
   //=== GET CHANNEL ===
   static getChannel(data) {
     if (data.byteLength < 4) return null;
-    return this._on(data).set.channel;
+    return this._on(data).set[0];
   }
   //=== REVICE/ON ===
   static onMove(data) {
     let on = this._on(data);
-    on.set.userId = on.get.getUint16(2, true);
-    on.set.mapId = on.get.getUint8(4);
-    on.set.x = Math.round(on.get.getFloat32(5, true) * 100) / 100;
-    on.set.y = Math.round(on.get.getFloat32(9, true) * 100) / 100;
+    on.set.push(on.get.getUint16(2, true));//userId
+    on.set.push(on.get.getUint8(4));//mapId
+    on.set.push(Math.round(on.get.getFloat32(5, true) * 100) / 100);//x
+    on.set.push(Math.round(on.get.getFloat32(9, true) * 100) / 100);//y
     return on.set;
   }
   static onStr(data) {
     let on = this._on(data);
-    on.set.userId = on.get.getUint16(2, true);
+    on.set.push(on.get.getUint16(2, true));
     const str = new Uint8Array(on.get.buffer.slice(4));
-    on.set.text = new TextDecoder("utf-8").decode(str);
+    on.set.push(new TextDecoder("utf-8").decode(str));
     return on.set;
   }
   static onCmd(data) {
     let on = this._on(data);
-    on.set.userId = on.get.getUint16(2, true);
-    on.set.cmd = on.get.getUint16(4, true);
+    on.set.push(on.get.getUint16(2, true));
+    on.set.push(on.get.getUint16(4, true));
     return on.set;
   }
   static onObj(data) {
