@@ -72,7 +72,7 @@ export class Act {
   static onCmd(data) {
     let on = this._on(data);
     on.set.userId = on.get.getUint16(2, true);
-    on.set.data = on.get.buffer.slice(4);
+    on.set.cmd = on.get.getUint16(4, true);
     return on.set;
   }
   static onObj(data) {
