@@ -1,3 +1,3 @@
 export class N {
-  static g = (n) => alert(String(n));
+  static s = (n) => alert(String(n));
 }
