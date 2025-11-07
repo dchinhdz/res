@@ -8,7 +8,7 @@ class App {
   _i() {
     try {
       this.s = new S(this.u);
-      this.s.o('m', () => (e) => this._run(e.data));
+      this.s.o('m', (e) => this._run(e.data));
       this.s.o('o', () => N.s('Connected!'));
       this.s.o('e', () => N.s('Error!'));
       this.s.o('c', () => N.s('Disconnect!'));
