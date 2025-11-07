@@ -1,22 +1,22 @@
 export class Read {
-  constructor(data) {
-    this.data = data || null;
+  static channel(data) {
+    if (Array.isArray(data)) return this.data[0];
+    return this.data?.channel ?? null;
   }
-  _isArray() {
-    return this.data && Array.isArray(this.data);
-    
+  static userId(data) {
+    if (Array.isArray(data)) return this.data[1];
+    return this.data?.channel ?? null;
   }
-  _isObject() {
-    return this.data && typeof this.data === "object" && !Array.isArray(this.data);
-  }
-  channel() {
-    if (this._isArray()) return this.data[0];
-    if (this._isObject()) return this.data.channel;
+  static move(data) {
+    if (Array.isArray(data)) {
+    return {userId: data[1],  map: data[2], x: data[3], y: data[4]};
+    }
     return null;
   }
-  userId() {
-    if (this._isArray()) return this.data[1];
-    if (this._isObject()) return this.data.channel;
-    return null;
+  static str(data) {
+    if (Array.isArray(data)) return data[2] ?? null;
+  }
+  static cmd(data) {
+    if (Array.isArray(data)) return data[2] ?? null;
   }
 }
