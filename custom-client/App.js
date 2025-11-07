@@ -21,4 +21,4 @@ class App {
     this.s?.o('m', (e) => N.s(e.data));
   }
 }
-const App = new App().run();
+const app = new App().run();
