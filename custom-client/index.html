@@ -61,7 +61,7 @@
         ws.on("message", (e) => {
           if (Act.isBinary(e.data)) {
             const channel = Act.getChannel(e.data);
-            if (channel === 10) {
+            if (channel === 1) {
                log('RE MOVE: '+JSON.stringify(Act.onMove(e.data)));
              } else if(channel === 20) {
                log('RE BINARY STRING: '+JSON.stringify(Act.onStr(e.data)));
