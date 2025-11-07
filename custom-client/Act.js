@@ -1,8 +1,9 @@
 export class Act {
   static _emit(channel, bytes) {
-    const buffer = new ArrayBuffer(2+bytes);
+    const buffer = new ArrayBuffer(4+bytes);
     const emit = new DataView(buffer);
     emit.setUint16(0, channel, true);//channel
+    emit.setUint16(2, 0, true);//userId
     return emit;
   }
   static _on(data) {
@@ -12,21 +13,21 @@ export class Act {
   //=== EMIT/SEND ===
   static move(map, x, y) {
     const emit = this._emit(1,9);
-    emit.setUint8(2, Number(map));//id map
-    emit.setFloat32(3, x, true);
-    emit.setFloat32(7, y, true);
+    emit.setUint8(4, Number(map));//id map
+    emit.setFloat32(5, x, true);
+    emit.setFloat32(9, y, true);
     return emit.buffer;
   }
   static cmd(channel, cmd) {
     const emit = this._emit(channel, 2);
-    emit.setUint16(2, Number(cmd), true);//cmd-id
+    emit.setUint16(4, Number(cmd), true);//cmd-id
     return emit.buffer;
   }
   static str(channel, string) {
     const str = new TextEncoder().encode(string);
     const emit = this._emit(channel, str.length);
     for (let i=0;i<str.length;i++) {
-      emit.setUint8(2+i, str[i]);
+      emit.setUint8(4+i, str[i]);
     }
     return emit.buffer;
   }
