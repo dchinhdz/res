@@ -26,10 +26,12 @@
         div.appendChild(iv);
       }
       function clearLog() {
+        alert();
         div.innerHTML = '';
         log('clean log...');
       }
       function emitS(type) {
+        alert('emit');
         if (ws.readyState !== 1) return log('Websocket chưa sẵn sàng!');
         if (type === 'move') {
           ws.emit(Act.move(10, 133.4, 23.6));
