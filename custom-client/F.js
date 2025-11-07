@@ -12,7 +12,7 @@ export class F {
   }
   static async g(f) {
     try {
-      const r = await fetch(`/${f}`, {method: 'get'});
+      const r = await fetch(`/?${f}`, {method: 'get'});
       return r.ok ? (await r.json().catch(() => false)) : false;
     } catch {return false};
   }
