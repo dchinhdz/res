@@ -9,7 +9,7 @@
   <body>
     <h2>TEST WEBSOCKET 2</h2>
     <div id="log"></div>
-    <button type="button" onclick="alert();">ALERT</button>
+    <button type="button" onclick="satus();">STATUS</button>
     <button type="button" onclick="clearLog();">CLEAR</button>
     <button type="button" onclick="emitS('str');">STRING</button>
     <button type="button" onclick="emitS('obj');">OBJECT</button>
@@ -26,8 +26,9 @@
         iv.textContent = `📩 ${text}`;
         div.appendChild(iv);
       }
+      window.status = () => {
+        log(`Status Websocket: ${ws.status} | check Act: ${typeof Act}`);
       window.clearLog = () => {
-        alert(typeof Act);
         div.innerHTML = '';
         log('clean log...');
       }
