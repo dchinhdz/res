@@ -48,6 +48,10 @@ export class Socket {
     this.ws?.readyState === 1 && this.ws.send(d);
   }
 
+  status() {
+    return this.ws?.readyState;
+  }
+
   close() {
     this.#cleanup();
   }
