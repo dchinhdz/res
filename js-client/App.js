@@ -1,6 +1,6 @@
-import {S} from './_modules/Socket.js';
-import {D} from './_modules/Display.js';
-import {A} from './_modules/Action.js';
+import {S} from './modules/Socket.js';
+import {D} from './modules/Display.js';
+import {A} from './modules/Action.js';
 class App {
   constructor() {
     this.u = "wss://websocket-echo.com";
@@ -28,4 +28,3 @@ class App {
 }
 const app = new App();
 setInterval(app.ping.bind(app), 5000);
-alert(typeof app);
