@@ -1,5 +1,6 @@
 import {S} from './S.js';
 import {N} from './N.js';
+import {A} from './A.js';
 class App {
   constructor() {
     this.u = "wss://websocket-echo.com";
@@ -18,10 +19,10 @@ class App {
   }
   ping() {
     this.p = Date.now();
-    this.s?.e(0);
+    this.s?.e(A.p());
   }
   _run(e) {
-    if (e == "0") return N.s(Date.now() - this.p);
+    if (A.iB(e) && A.iP(e)) return N.s(Date.now() - this.p);
     return N.s(e);
   }
 }
