@@ -1,5 +1,5 @@
 // Websocket
-class S {
+export class S {
   constructor(u) {
     this.u = u || `wss://${location.host}/`;
     this.d = 1000;
@@ -44,4 +44,4 @@ class S {
   s = () => this.w?.readyState;
   c = () => this._c();
 }
-export const S = new S();
+export const WS = new S();
