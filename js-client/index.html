@@ -9,7 +9,7 @@
     <div id="text">...</div>
     <div id="ping">⚪ 0 ms</div>
     <script type="module">
-      import {S} from './_modules/Socket.js';
+import {S} from './_modules/Socket.js';
 import {D} from './_modules/Display.js';
 import {A} from './_modules/Action.js';
 class App {
@@ -39,7 +39,6 @@ class App {
 }
 const app = new App();
 setInterval(app.ping.bind(app), 5000);
-alert(typeof app);
     </script>
   </body>
 </html>
