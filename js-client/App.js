@@ -1,6 +1,6 @@
-import {S} from './Socket.js';
-import {D} from './Display.js';
-import {A} from './Action.js';
+import {S} from './_modules/Socket.js';
+import {D} from './_modules/Display.js';
+import {A} from './_modules/Action.js';
 class App {
   constructor() {
     this.u = "wss://websocket-echo.com";
