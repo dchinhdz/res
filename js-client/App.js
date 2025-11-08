@@ -18,11 +18,13 @@ class App {
     }
   }
   ping() {
+    if (this.s?.s !== 1) return; 
     this.p = performance.now();
-    this.s?.e(A.p());
+    this.s.e(A.p());
   }
   _run(e) {
-    if (A.iB(e) && A.iP(e)) return D.p(Math.round(performance.now() - this.p));
+    if (this.s?.s === 1 && A.iB(e) && A.iP(e)) return D.p(Math.round(performance.now() - this.p));
+    if (this.s?.s !== 1) return D.p(999);
     D.n(e);
   }
 }
