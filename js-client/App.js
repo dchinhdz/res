@@ -14,7 +14,7 @@ class App {
       this.s.o('e', () => D.n('#text', 'Error!'));
       this.s.o('c', () => D.n('#text', 'Disconnect!'));
     } catch {
-      N.s('Not open Websocket!');
+      D.n('Not open Websocket!');
     }
   }
   ping() {
