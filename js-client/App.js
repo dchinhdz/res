@@ -28,3 +28,4 @@ class App {
 }
 const app = new App();
 setInterval(app.ping.bind(app), 5000);
+alert(typeof app);
