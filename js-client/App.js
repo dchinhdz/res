@@ -27,7 +27,7 @@ class App {
   }
   _dis() {
     D.n('Disconnect!');
-    D.q(999);
+    D.p(999);
 }
 }
 const app = new App();
