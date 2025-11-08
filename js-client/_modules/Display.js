@@ -1,8 +1,20 @@
 //Display to DOM class
 export class D {
-  _q = (q) => document.querySelector(q);
+  static _q = (q) => document.querySelector(q);
   //notice
-  static n = (n) => alert(String(n));
+  static n(q, t) {
+    this._q(q).textContent = `📢: ${String(t)}`;
+  }
   //ping (ms)
-  static p = (p) => this._q(q);
+  static p(q, t) {
+    let m, p = Number(t);
+    if (p >= 0 && p < 100) {
+      m = `🟢 ${p} ms`;
+    } else if(p < 200) {
+      m = `🟡 ${p} ms`;
+    } else {
+      m = `🔴 ${p} ms`;
+    }
+    this._q(q).textContent = m;
+  }
 }
