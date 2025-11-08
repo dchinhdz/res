@@ -8,9 +8,9 @@ export class D {
   //ping (ms)
   static p(q, t) {
     let m, p = Number(t);
-    if (p >= 0 && p < 100) {
+    if (p >= 0 && p < 200) {
       m = `🟢 ${p} ms`;
-    } else if(p < 200) {
+    } else if(p < 500) {
       m = `🟡 ${p} ms`;
     } else {
       m = `🔴 ${p} ms`;
