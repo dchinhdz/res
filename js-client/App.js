@@ -10,9 +10,9 @@ class App {
     try {
       this.s = new S(this.u);
       this.s.o('m', (e) => this._run(e.data));
-      this.s.o('o', () => D.n('#text', 'Connected!'));
-      this.s.o('e', () => D.n('#text', 'Error!'));
-      this.s.o('c', () => D.n('#text', 'Disconnect!'));
+      this.s.o('o', () => D.n('Connected!'));
+      this.s.o('e', () => D.n('Error!'));
+      this.s.o('c', () => D.n('Disconnect!'));
     } catch {
       D.n('Not open Websocket!');
     }
@@ -22,8 +22,8 @@ class App {
     this.s?.e(A.p());
   }
   _run(e) {
-    if (A.iB(e) && A.iP(e)) return D.p('#ping', Math.round(performance.now() - this.p));
-    D.n('#text', e);
+    if (A.iB(e) && A.iP(e)) return D.p(Math.round(performance.now() - this.p));
+    D.n(e);
   }
 }
 const app = new App();
