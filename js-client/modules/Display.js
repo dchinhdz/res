@@ -15,6 +15,6 @@ export class D {
     } else {
       m = `🔴 <b style="color:red">${p} ms</b>`;
     }
-    this._q(q).textContent = m;
+    this._q(q).innerHTML = m;
   }
 }
