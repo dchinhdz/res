@@ -43,10 +43,14 @@ export class A {
   }
   static iB(a) {
     try {
-      return a instanceof ArrayBuffer || ArrayBuffer.isView(a);
+      return a instanceof ArrayBuffer;
     } catch {
       return false;
     }
+  }
+  static iP(a) {
+    if (a.byteLength !== 1) return false;
+    return (new Uint8Array(a)[0] === 0) ? true : false;
   }
   //=== GET CHANNEL ===
   static gC(a) {
