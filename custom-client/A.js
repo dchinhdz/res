@@ -31,6 +31,7 @@ export class A {
     }
     return e.buffer;
   }
+  static p = () => new Uint8Array([0]).buffer;
   //=== TYPE CHECK ===
   static iO(a) {
     if (typeof a !== "string") return false;
