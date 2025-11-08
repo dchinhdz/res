@@ -18,12 +18,15 @@ class App {
     }
   }
   ping() {
-    this.p = Date.now();
+    this.p = performance.now();
     this.s?.e(A.p());
   }
   _run(e) {
-    if (A.iB(e) && A.iP(e)) return N.s(Date.now() - this.p);
-    return N.s(e);
+    if (A.iB(e) && A.iP(e)) {
+      const ms = (performance.now() - this.p).toString().split('.')[1] || '0';
+      return N.s(parseInt(ms.slice(-3), 10));
+    }
+    N.s(e);
   }
 }
 const app = new App();
