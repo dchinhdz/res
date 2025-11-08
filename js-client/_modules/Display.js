@@ -4,5 +4,5 @@ export class D {
   //notice
   static n = (n) => alert(String(n));
   //ping (ms)
-  static p = (p) => this.q(q);
+  static p = (p) => this._q(q);
 }
