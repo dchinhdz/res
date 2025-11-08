@@ -27,7 +27,7 @@ class App {
   
   _main(e) {
     if (A.iB(e) && A.iP(e)) return D.p(Math.round(performance.now() - this.n));
-    D.n(e);D.p(535);
+    D.n(e);
   }
   _run() {
     D.n('Connected!');
