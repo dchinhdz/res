@@ -22,10 +22,7 @@ class App {
     this.s?.e(A.p());
   }
   _run(e) {
-    if (A.iB(e) && A.iP(e)) {
-      const ms = (performance.now() - this.p).toString().split('.')[1] || '0';
-      return D.p('#ping', parseInt(ms.slice(-3), 10));
-    }
+    if (A.iB(e) && A.iP(e)) return D.p('#ping', Math.round(performance.now() - this.p));
     D.n('#text', e);
   }
 }
