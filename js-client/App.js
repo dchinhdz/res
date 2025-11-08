@@ -20,13 +20,13 @@ class App {
   
   p() {
     this.ping = setInterval(() => {
-      this.p = performance.now();
+      this.n = performance.now();
       this.s?.e(A.p());
     }, 3000);
   }
   
   _main(e) {
-    if (A.iB(e) && A.iP(e)) return D.p(Math.round(performance.now() - this.p));
+    if (A.iB(e) && A.iP(e)) return D.p(Math.round(performance.now() - this.n));
     D.n(e);
   }
   _run = () => D.n('Connected!') && this.p();
