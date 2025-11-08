@@ -29,8 +29,19 @@ class App {
     if (A.iB(e) && A.iP(e)) return D.p(Math.round(performance.now() - this.n));
     D.n(e);
   }
-  _run = () => D.n('Connected!') && this.p();
-  _err = () => D.n('Error!') && clearInterval(this.ping) && D.p(999);
-  _dis = () => D.n('Disconnect!') && clearInterval(this.ping) && D.p(999);
+  _run() {
+    D.n('Connected!');
+    this.p();
+  }
+  _err() {
+    D.n('Error!');
+    clearInterval(this.ping);
+    D.p(999);
+  }
+  _dis() {
+    D.n('Disconnect!');
+    clearInterval(this.ping);
+    D.p(999);
+  }
 }
 const app = new App();
