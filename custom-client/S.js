@@ -1,10 +1,12 @@
-export class S {
+// Websocket
+class S {
   constructor(u) {
     this.u = u || `wss://${location.host}/`;
     this.d = 1000;
     this.h = {o: [], c: [], m: [], e: []};
     this._C();
   }
+  //connect
   _C() {
     if (this.w?.readyState < 2) return;
     this._c();
@@ -21,6 +23,7 @@ export class S {
     this.w.onmessage = e => this.h.m.forEach(h => h(e));
     this.w.onerror = e => this.h.e.forEach(h => h(e));
   }
+  //clean
   _c() {
     if (this.w) {
       this.w.onopen = this.w.onclose = this.w.onmessage = this.w.onerror = null;
@@ -28,6 +31,7 @@ export class S {
       this.w = null;
     }
   }
+  //auto reconnect
   _R() {
     setTimeout(() => {
       this._C();
@@ -40,3 +44,4 @@ export class S {
   s = () => this.w?.readyState;
   c = () => this._c();
 }
+export const S = new S();
