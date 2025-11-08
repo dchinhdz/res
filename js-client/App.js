@@ -30,7 +30,7 @@ class App {
     D.n(e);
   }
   _run = () => D.n('Connected!') && this.p();
-  _err = () => D.n('Error!') && clearInterval(this.ping);
+  _err = () => D.n('Error!') && clearInterval(this.ping) && D.p(999);
   _dis = () => D.n('Disconnect!') && clearInterval(this.ping) && D.p(999);
 }
 const app = new App();
