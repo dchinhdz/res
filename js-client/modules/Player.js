@@ -32,6 +32,7 @@ export class P {
 
   async _r() {
     const f = await this.f(this.root);
+    if (!f) return;
     this.c.rW = f.naturalWidth;
     this.c.rH = f.naturalHeight;
   }
@@ -40,18 +41,21 @@ export class P {
     await this._r();
     const j = this.item.flatMap((a, k) => a[0].map(v => ({k, v, x:a[1], y:a[2]})));
     const l = await Promise.all(j.map(i => this.f(i.v)));//load img by value map
+    if (!l.length) return;
     l.forEach((h, i) => {
       if (!h) return;
       const {naturalWidth:W,naturalHeight:H} = h;
+      const {x,y} = j[i];
       this.c.mW = Math.max(this.c.mW, W);
       this.c.mH = Math.max(this.c.mH, H);
-      //tinh toán phần dư bên trên
-      if (j[i].y < 0 && Math.abs(j[i].y) < H) this.c.u.push(H + j[i].y);
-      if (j[i].y < 0 && Math.abs(j[i].y) > H) this.c.u.push((Math.abs(j[i].y) - H) + H);
-      //phần dư bên dưới
-      if (j[i].y > 0 && Math.abs(j[i].y) < H) this.c.u.push(H + j[i].y);
-      if (j[i].y > 0 && Math.abs(j[i].y) > H) this.c.u.push((Math.abs(j[i].y) - H) + H);
-    
+      //tinh toán phần dư up-down-left-right
+      if (y < 0) this.c.u.push(-y);
+      if (y > 0) this.c.d.push(y);
+      if (x < 0) this.c.l.push(-x);
+      if (x > 0) this.c.r.push(x);
     });
+    //tính tổng Width/Height canvas
+    this.c.mW = Math.max(this.c.mW, (this.c.rW + Math.max(0,...this.c.l) + Math.max(0,...this.c.r)));
+    this.c.mH = Math.max(this.c.mH, (this.c.rH + Math.max(0,...this.c.u) + Math.max(0,...this.c.d)));
   }
 }
