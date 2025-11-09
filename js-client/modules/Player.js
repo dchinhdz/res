@@ -32,15 +32,18 @@ export class P {
 
   async _r() {
     const f = await this.f(this.root);
-    if (!f) return;
+    if (!f) return false;
     this.c.rW = f.naturalWidth;
     this.c.rH = f.naturalHeight;
+    return true;
   }
   
   async run() {
-    await this._r();
-    const j = this.item.flatMap((a, k) => a[0].map(v => ({k, v, x:a[1], y:a[2]})));
-    const l = await Promise.all(j.map(i => this.f(i.v)));//load img by value map
+    if (!await this._r()) return;
+    let j = this.item.flatMap((a, k) => a[0].map(v => ({k, v, x:a[1], y:a[2]})));
+    let l = await Promise.all(j.map(i => this.f(i.v)));//load img by value map
+    j = j.filter((_, idx) => l[idx] !== null); // loại phần tử tương ứng
+    l = l.filter(img => img !== null);
     if (!l.length) return;
     l.forEach((h, i) => {
       if (!h) return;
