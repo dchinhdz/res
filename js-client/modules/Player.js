@@ -29,22 +29,29 @@ export class P {
       k.onerror = () => r(null);
     });
   }
+
+  async _r() {
+    const f = await this.f(this.root);
+    this.c.rW = f.naturalWidth;
+    this.c.rH = f.naturalHeight;
+  }
   
-  async c() {
+  async run() {
+    await this._r();
     const j = this.item.flatMap((a, k) => a[0].map(v => ({k, v, x:a[1], y:a[2]})));
-    const k = j.map(k => k.k);//key
-    const v = j.map(v => v.v);//value
-    const x = j.map(x => x.x);//x
-    const y = j.map(y => y.y);//y
-    const l = await Promise.all(v.map(i => this.f(i)));//value map
+    const l = await Promise.all(j.map(i => this.f(i.v)));//load img by value map
     l.forEach((h, i) => {
       if (!h) return;
-      this.c.mW = Math.max(this.c.mW, h.naturalWidth);
-      this.c.mH = Math.max(this.c.mH, h.naturalHeight);
-      if (v[i] === this.root) {
-        this.c.rW = h.naturalWidth;
-        this.c.rH = h.naturalHeight;
-      }
+      const {naturalWidth:W,naturalHeight:H} = h;
+      this.c.mW = Math.max(this.c.mW, W);
+      this.c.mH = Math.max(this.c.mH, H);
+      //tinh toán phần dư bên trên
+      if (j[i].y < 0 && Math.abs(j[i].y) < H) this.c.u.push(H + j[i].y);
+      if (j[i].y < 0 && Math.abs(j[i].y) > H) this.c.u.push((Math.abs(j[i].y) - H) + H);
+      //phần dư bên dưới
+      if (j[i].y > 0 && Math.abs(j[i].y) < H) this.c.u.push(H + j[i].y);
+      if (j[i].y > 0 && Math.abs(j[i].y) > H) this.c.u.push((Math.abs(j[i].y) - H) + H);
+    
     });
   }
 }
