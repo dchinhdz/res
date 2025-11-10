@@ -47,15 +47,17 @@ export class P {
   }
   _renderItemLayer(arr) {
     if (!arr || !arr.length) return null;
-    const maxW = Math.max(...arr.map(i => this.cache[i].naturalWidth));
-    const maxH = Math.max(...arr.map(i => this.cache[i].naturalHeight));
+    const maxW = Math.max(...arr.map(i => this.cache[i].naturalWidth || 0));
+    const maxH = Math.max(...arr.map(i => this.cache[i].naturalHeight || 0));
     const speed = 200;//ms
     const canvas = getContext("2d);
+    canvas.clearRect(0, 0, maxW, maxH);
+    drawImage(this.cache[i].src, x, y, this.cache[i].natural
   }
   _main() {
     if (!this.obj.root || !this.obj.item.length || !this.obj.draw.length ||  !Object.keys(this.cache).length) return;
     //code xử lý chính
-    this.cache.forEach();
+    //this.cache.forEach();
   }
   //f = (i) => Object.assign(new Image(), { src: `/img/item/hd/${i}.png` });
   f(i) {
