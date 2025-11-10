@@ -45,9 +45,17 @@ export class P {
       this.cache[i] = await this.f(i);
     }
   }
+  _renderItemLayer(arr) {
+    if (!arr || !arr.length) return null;
+    const maxW = Math.max(...arr.map(i => this.cache[i].naturalWidth));
+    const maxH = Math.max(...arr.map(i => this.cache[i].naturalHeight));
+    const speed = 200;//ms
+    const canvas = getContext("2d);
+  }
   _main() {
     if (!this.obj.root || !this.obj.item.length || !this.obj.draw.length ||  !Object.keys(this.cache).length) return;
     //code xử lý chính
+    this.cache.forEach();
   }
   //f = (i) => Object.assign(new Image(), { src: `/img/item/hd/${i}.png` });
   f(i) {
