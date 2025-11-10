@@ -3,7 +3,7 @@ export class D {
   static _q = (q) => document.querySelector(q);
   //notice
   static n(t) {
-    this._q('#notice').innerHTML = `📢: ${String(t)}`;
+    this._q('#notice')?.innerHTML = `📢: ${String(t)}`;
   }
   //ping (ms)
   static p(t) {
@@ -15,6 +15,6 @@ export class D {
     } else {
       m = `🔴 <b style="color:red">${p} ms</b>`;
     }
-    this._q('#ping').innerHTML = m;
+    this._q('#ping')?.innerHTML = m;
   }
 }
