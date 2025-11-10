@@ -1,8 +1,14 @@
 export class P {
   constructor() {
+    this.cache = {};
     this.obj = {item: [], draw: [], root: 0};
     this.c = {rW:0,rH:0,mW:0,mH:0,u:[],d:[],l:[],r:[]};
+  }
+  async run() {
     this._data();
+    await this._loadRoot();
+    await this._loadCacheItem();
+    this._main();
   }
   _data() {
     const data = [102,
@@ -24,11 +30,25 @@ export class P {
       if (!Array.isArray(data[k+1]) || data[k+1].length < 3) return;             
       this.obj.draw.push(v);
       this.obj.item.push(data[k+1].slice(2));
-                  });
+    });
   }
-      
 
-
+  async _loadRoot() {
+    const f = await this.f(this.obj.root);
+    if (!f) return;
+    this.c.rW = f.naturalWidth;
+    this.c.rH = f.naturalHeight;
+  }
+  async _loadCacheItem() {
+    if (!this.obj.item.length) return;
+    for (const i of this.obj.item.flat()) {
+      this.cache[i] = await this.f(i);
+    }
+  }
+  _main() {
+    if (!this.obj.root || !this.obj.item.length || !this.obj.draw.length ||  !Object.keys(this.cache).length) return;
+    //code xử lý chính
+  }
   //f = (i) => Object.assign(new Image(), { src: `/img/item/hd/${i}.png` });
   f(i) {
     return new Promise(r => {
@@ -38,14 +58,7 @@ export class P {
       k.onerror = () => r(null);
     });
   }
-
-  async _r() {
-    const f = await this.f(this.root);
-    if (!f) return false;
-    this.c.rW = f.naturalWidth;
-    this.c.rH = f.naturalHeight;
-    return true;
-  }
+}
   
   async run() {
     if (!await this._r()) return;
@@ -70,4 +83,3 @@ export class P {
     this.c.mW = Math.max(this.c.mW, (this.c.rW + Math.max(0,...this.c.l) + Math.max(0,...this.c.r)));
     this.c.mH = Math.max(this.c.mH, (this.c.rH + Math.max(0,...this.c.u) + Math.max(0,...this.c.d)));
   }
-}
