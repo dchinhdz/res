@@ -1,25 +1,34 @@
 export class P {
-  constructor(arr) {
-    this.item = arr || [];
-    this.root = "002";
+  constructor() {
+    this.obj = {item: [], draw: [], root: 0};
     this.c = {rW:0,rH:0,mW:0,mH:0,u:[],d:[],l:[],r:[]};
-    this._demo();
+    this._data();
   }
-  _demo() {
-    this.item.push([["10710"],41,-18]);//bieutuong
-    this.item.push([["10728"],-15,45]);//haoquang
-    this.item.push([["5900"],-28,0]);//canh
-    this.item.push([["201", "202"],9,46]);//quan
-    this.item.push([["193"],5,34]);//ao
-    this.item.push([["002"],0,0]);//khuanmat
-    this.item.push([["174"],12,15]);//mat
-    this.item.push([["9351"],-5,-16]);//toc
-    this.item.push([["0"],0,0]);//kinh
-    this.item.push([["155"],21,25]);//matna
-    this.item.push([["0"],0,0]);//non
-    this.item.push([["115"],30,34]);//docamtay
-    this.item.push([["10725", "10726"],-86,0]);//pet
+  _data() {
+    const data = [102,
+                  [41, -18, 10710, 10711, 10712],
+                  [-15, 45, 10728, 10729],
+                  [-28, 0, 5900, 5901],
+                  [9, 46, 201],
+                  [5, 34, 193],
+                  [0, 0, 102],
+                  [12, 15, 174],
+                  [-5, -16, 9351],
+                  [21, 25, 155],
+                  [30, 34, 115, 116, 117],
+                  [-86, 0, 10725, 10726]];
+    if (!Array.isArray(data) || data.length < 2) return;
+    if (data[0]) this.obj.root = data[0];
+    const draw = data.slice(1).map(i => ({x:i[0], y:i[1]}));
+    if (draw.length) draw.forEach((v, k) => {
+      if (!Array.isArray(data[k+1]) || data[k+1].length < 3) return;             
+      this.obj.draw.push(v);
+      this.obj.item.push(data[k+1].slice(2));
+                  });
   }
+      
+
+
   //f = (i) => Object.assign(new Image(), { src: `/img/item/hd/${i}.png` });
   f(i) {
     return new Promise(r => {
