@@ -73,7 +73,11 @@ export class P {
     for (const i of this.obj.item) {
       this.layer.push(this._renderItemLayer(i));
     }
-    
+    this.obj.item.flat().foEach(i => {
+      if (!this.cache[i]) return;
+      this.c.mW = Math.max(this.c.mW, this.cache[i].naturalWidth);
+      this.c.mH = Math.max(this.c.mH, this.cache[i].naturalHeight);
+    }
   }
   //f = (i) => Object.assign(new Image(), { src: `/img/item/hd/${i}.png` });
   f(i) {
