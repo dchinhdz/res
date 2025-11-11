@@ -1,7 +1,7 @@
 export class P {
   constructor() {
     this.cache = {};
-    this.layer = [];
+    //this.layer = [];
     this.obj = {item: [], draw: [], root: 0};
     this.c = {rW:0,rH:0,mW:0,mH:0,u:0,d:0,l:0,r:0};
   }
@@ -10,7 +10,7 @@ export class P {
     await this._loadRoot();
     await this._loadCacheItem();
     this._renderItemDraw();
-    this._main();
+    return this._main();
   }
   _data() {
     const data = [102,
