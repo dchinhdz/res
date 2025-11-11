@@ -9,6 +9,7 @@ export class P {
     this._data();
     await this._loadRoot();
     await this._loadCacheItem();
+    this._renderItemDraw();
     this._main();
   }
   _data() {
@@ -50,7 +51,7 @@ export class P {
     if (!arr || !arr.length) return null;
     const maxW = Math.max(...arr.map(i => this.cache[i].naturalWidth || 0));
     const maxH = Math.max(...arr.map(i => this.cache[i].naturalHeight || 0));
-    const fps = 1000 / 2;
+    const fps = 1000 / 5;
     let i = 0, last = 0;
     const canvas = document.createElement('canvas');
     canvas.width = maxW; canvas.height = maxH;
@@ -65,21 +66,17 @@ export class P {
       i = (i + 1) % arr.length;
       };
     requestAnimationFrame(animate);
-    return ctx;
+    return canvas;
   }
-  _main() {
-    if (!this.obj.root || !this.obj.item.length || !this.obj.draw.length ||  !Object.keys(this.cache).length) return;
-    //code xử lý chính
-    for (const i of this.obj.item) {
-      this.layer.push(this._renderItemLayer(i));
-    }
+  _renderItemDraw() {
+    if (!this.obj.item.length || !this.obj.draw.length ||  !Object.keys(this.cache).length) return;
     this.obj.item.forEach((l, k) => {
       l.forEach(i => {
         if (!this.cache[i]) return;
         this.c.mW = Math.max(this.c.mW, this.cache[i].naturalWidth);
         this.c.mH = Math.max(this.c.mH, this.cache[i].naturalHeight);
         // tính toán phần dư
-        const {x, y} = this.draw[k];
+        const {x, y} = this.obj.draw[k];
         if (y < 0) this.c.u.push(-y);
         if (y > 0) this.c.d.push(y);
         if (x < 0) this.c.l.push(-x);
@@ -88,6 +85,13 @@ export class P {
     });
     this.c.mW = Math.max(this.c.mW, (this.c.rW + Math.max(0,...this.c.l) + Math.max(0,...this.c.r)));
     this.c.mH = Math.max(this.c.mH, (this.c.rH + Math.max(0,...this.c.u) + Math.max(0,...this.c.d)));
+  }
+  _main() {
+    if (!this.obj.root || !this.obj.item.length || !this.obj.draw.length ||  !Object.keys(this.cache).length) return;
+    //code xử lý chính
+    for (const i of this.obj.item) {
+      this.layer.push(this._renderItemLayer(i));
+    }
   }
   //f = (i) => Object.assign(new Image(), { src: `/img/item/hd/${i}.png` });
   f(i) {
