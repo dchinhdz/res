@@ -28,7 +28,7 @@ export class P {
     if (!Array.isArray(data) || data.length < 2) return;
     if (data[0]) this.obj.root = data[0];
     const draw = data.slice(1).map(i => ({x:i[0], y:i[1]}));
-    if (draw.length) for([k, v] of draw.entries()) {
+    if (draw.length) for(const [k, v] of draw.entries()) {
       const d = data[k+1];
       if (!Array.isArray(d) || d.length < 3) continue;             
       this.obj.draw.push(v);
@@ -89,7 +89,6 @@ export class P {
   }
   _main() {
     if (!this.obj.root || !this.obj.item.length || !this.obj.draw.length ||  !Object.keys(this.cache).length) return;
-    //code xử lý chính
     for (const i of this.obj.item) {
       this.layer.push(this._renderItemLayer(i));
     }
@@ -97,7 +96,7 @@ export class P {
     canvas.width = this.c.mW; canvas.height = this.c.mH;
     const ctx = canvas.getContext('2d');
     if (this.layer.length !== this.obj.draw.length) return canvas;
-    for (const l this.layer.length) {
+    for (const l of this.layer.length) {
       return;
     }
   }
