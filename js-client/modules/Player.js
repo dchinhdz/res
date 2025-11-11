@@ -1,6 +1,7 @@
 export class P {
   constructor() {
     this.cache = {};
+    this.layer = [];
     this.obj = {item: [], draw: [], root: 0};
     this.c = {rW:0,rH:0,mW:0,mH:0,u:[],d:[],l:[],r:[]};
   }
@@ -49,15 +50,30 @@ export class P {
     if (!arr || !arr.length) return null;
     const maxW = Math.max(...arr.map(i => this.cache[i].naturalWidth || 0));
     const maxH = Math.max(...arr.map(i => this.cache[i].naturalHeight || 0));
-    const speed = 200;//ms
-    const canvas = getContext("2d);
-    canvas.clearRect(0, 0, maxW, maxH);
-    drawImage(this.cache[i].src, x, y, this.cache[i].natural
+    const fps = 1000 / 2;
+    let i = 0, last = 0;
+    const canvas = document.createElement('canvas');
+    canvas.width = maxW; canvas.height = maxH;
+    const ctx = canvas.getContext('2d');
+    const animate = (now) => {
+      requestAnimationFrame(animate);
+      if (now - last < fps) return;
+      last = now;
+      ctx.clearRect(0, 0, maxW, maxH);
+      const layer = this.cache[arr[i]];
+      if (layer) ctx.drawImage(layer, 0, 0, layer.naturalWidth, layer.naturalHeight);
+      i = (i + 1) % arr.length;
+      };
+    requestAnimationFrame(animate);
+    return ctx;
   }
   _main() {
     if (!this.obj.root || !this.obj.item.length || !this.obj.draw.length ||  !Object.keys(this.cache).length) return;
     //code xử lý chính
-    //this.cache.forEach();
+    for (const i of this.obj.item) {
+      this.layer.push(this._renderItemLayer(i));
+    }
+    
   }
   //f = (i) => Object.assign(new Image(), { src: `/img/item/hd/${i}.png` });
   f(i) {
