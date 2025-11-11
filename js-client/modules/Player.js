@@ -73,11 +73,21 @@ export class P {
     for (const i of this.obj.item) {
       this.layer.push(this._renderItemLayer(i));
     }
-    this.obj.item.flat().foEach(i => {
-      if (!this.cache[i]) return;
-      this.c.mW = Math.max(this.c.mW, this.cache[i].naturalWidth);
-      this.c.mH = Math.max(this.c.mH, this.cache[i].naturalHeight);
-    }
+    this.obj.item.forEach((l, k) => {
+      l.forEach(i => {
+        if (!this.cache[i]) return;
+        this.c.mW = Math.max(this.c.mW, this.cache[i].naturalWidth);
+        this.c.mH = Math.max(this.c.mH, this.cache[i].naturalHeight);
+        // tính toán phần dư
+        const {x, y} = this.draw[k];
+        if (y < 0) this.c.u.push(-y);
+        if (y > 0) this.c.d.push(y);
+        if (x < 0) this.c.l.push(-x);
+        if (x > 0) this.c.r.push(x);
+      });
+    });
+    this.c.mW = Math.max(this.c.mW, (this.c.rW + Math.max(0,...this.c.l) + Math.max(0,...this.c.r)));
+    this.c.mH = Math.max(this.c.mH, (this.c.rH + Math.max(0,...this.c.u) + Math.max(0,...this.c.d)));
   }
   //f = (i) => Object.assign(new Image(), { src: `/img/item/hd/${i}.png` });
   f(i) {
@@ -89,27 +99,3 @@ export class P {
     });
   }
 }
-  
-  async run() {
-    if (!await this._r()) return;
-    let j = this.item.flatMap((a, k) => a[0].map(v => ({k, v, x:a[1], y:a[2]})));
-    let l = await Promise.all(j.map(i => this.f(i.v)));//load img by value map
-    j = j.filter((_, idx) => l[idx] !== null); // loại phần tử tương ứng
-    l = l.filter(img => img !== null);
-    if (!l.length) return;
-    l.forEach((h, i) => {
-      if (!h) return;
-      const {naturalWidth:W,naturalHeight:H} = h;
-      const {x,y} = j[i];
-      this.c.mW = Math.max(this.c.mW, W);
-      this.c.mH = Math.max(this.c.mH, H);
-      //tinh toán phần dư up-down-left-right
-      if (y < 0) this.c.u.push(-y);
-      if (y > 0) this.c.d.push(y);
-      if (x < 0) this.c.l.push(-x);
-      if (x > 0) this.c.r.push(x);
-    });
-    //tính tổng Width/Height canvas
-    this.c.mW = Math.max(this.c.mW, (this.c.rW + Math.max(0,...this.c.l) + Math.max(0,...this.c.r)));
-    this.c.mH = Math.max(this.c.mH, (this.c.rH + Math.max(0,...this.c.u) + Math.max(0,...this.c.d)));
-  }
