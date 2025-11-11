@@ -28,11 +28,12 @@ export class P {
     if (!Array.isArray(data) || data.length < 2) return;
     if (data[0]) this.obj.root = data[0];
     const draw = data.slice(1).map(i => ({x:i[0], y:i[1]}));
-    if (draw.length) draw.forEach((v, k) => {
-      if (!Array.isArray(data[k+1]) || data[k+1].length < 3) return;             
+    if (draw.length) for([k, v] of draw.entries()) {
+      const d = data[k+1];
+      if (!Array.isArray(d) || d.length < 3) continue;             
       this.obj.draw.push(v);
-      this.obj.item.push(data[k+1].slice(2));
-    });
+      this.obj.item.push(d.slice(2));
+    };
   }
 
   async _loadRoot() {
@@ -91,6 +92,13 @@ export class P {
     //code xử lý chính
     for (const i of this.obj.item) {
       this.layer.push(this._renderItemLayer(i));
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = this.c.mW; canvas.height = this.c.mH;
+    const ctx = canvas.getContext('2d');
+    if (this.layer.length !== this.obj.draw.length) return canvas;
+    for (const l this.layer.length) {
+      return;
     }
   }
   //f = (i) => Object.assign(new Image(), { src: `/img/item/hd/${i}.png` });
