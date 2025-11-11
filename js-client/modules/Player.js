@@ -56,7 +56,7 @@ export class P {
     canvas.width = maxW; canvas.height = maxH;
     const ctx = canvas.getContext('2d');
     if (arr.length === 1) {
-      const layer = this.cache[arr[i]];
+      const layer = this.cache[arr[0]];
       ctx.drawImage(layer, 0, 0, layer.naturalWidth, layer.naturalHeight);
       return canvas;
     }
@@ -106,7 +106,6 @@ export class P {
       const layer = this._renderItemLayer(this.obj.item[k]);
       const pixelX = this.c.l + v.x;
       const pixelY = this.c.u + v.y;
-      if (v.x < 0) pixelX = this.c.l + v.x
       ctx.drawImage(layer, pixelX, pixelY, layer.width, layer.height);
     }
     return canvas;
