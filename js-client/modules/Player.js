@@ -104,7 +104,10 @@ export class P {
     if (this.obj.item.length !== this.obj.draw.length) return canvas;
     for (const [k, v] of this.obj.draw.entries()) {
       const layer = this._renderItemLayer(this.obj.item[k]);
-      ctx.drawImage(layer, v.x, v.y, layer.width, layer.height);
+      const pixelX = this.c.l + v.x;
+      const pixelY = this.c.u + v.y;
+      if (v.x < 0) pixelX = this.c.l + v.x
+      ctx.drawImage(layer, pixelX, pixelY, layer.width, layer.height);
     }
     return canvas;
   }
