@@ -89,16 +89,19 @@ export class P {
   }
   _main() {
     if (!this.obj.root || !this.obj.item.length || !this.obj.draw.length ||  !Object.keys(this.cache).length) return;
+    /*
     for (const i of this.obj.item) {
       this.layer.push(this._renderItemLayer(i));
-    }
+    }*/
     const canvas = document.createElement('canvas');
     canvas.width = this.c.mW; canvas.height = this.c.mH;
     const ctx = canvas.getContext('2d');
-    if (this.layer.length !== this.obj.draw.length) return canvas;
-    for (const l of this.layer.length) {
-      return;
+    if (this.obj.item.length !== this.obj.draw.length) return canvas;
+    for (const [k, v] of this.obj.draw.entries()) {
+      const layer = this._renderItemLayer(this.obj.item[k]);
+      ctx.drawImage(layer, v.x, v.y, layer.width, layer.height);
     }
+    return canvas;
   }
   //f = (i) => Object.assign(new Image(), { src: `/img/item/hd/${i}.png` });
   f(i) {
