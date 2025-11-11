@@ -52,18 +52,23 @@ export class P {
     if (!arr || !arr.length) return null;
     const maxW = Math.max(...arr.map(i => this.cache[i].naturalWidth || 0));
     const maxH = Math.max(...arr.map(i => this.cache[i].naturalHeight || 0));
-    const fps = 1000 / 5;
-    let i = 0, last = 0;
     const canvas = document.createElement('canvas');
     canvas.width = maxW; canvas.height = maxH;
     const ctx = canvas.getContext('2d');
+    if (arr.length === 1) {
+      const layer = this.cache[arr[i]];
+      ctx.drawImage(layer, 0, 0, layer.naturalWidth, layer.naturalHeight);
+      return canvas;
+    }
+    const fps = 1000 / arr.length;
+    let i = 0, last = 0;
     const animate = (now) => {
       requestAnimationFrame(animate);
       if (now - last < fps) return;
       last = now;
       ctx.clearRect(0, 0, maxW, maxH);
       const layer = this.cache[arr[i]];
-      if (layer) ctx.drawImage(layer, 0, 0, layer.naturalWidth, layer.naturalHeight);
+      ctx.drawImage(layer, 0, 0, layer.naturalWidth, layer.naturalHeight);
       i = (i + 1) % arr.length;
       };
     requestAnimationFrame(animate);
