@@ -45,19 +45,20 @@ export class P {
   async _loadCacheItem() {
     if (!this.obj.item.length) return;
     for (const i of this.obj.item.flat()) {
-      this.cache[i] = await this.f(i);
+      const img = await this.f(i);
+      if (img) this.cache[i] = img;
     }
   }
   _renderItemLayer(arr) {
     if (!arr || !arr.length) return null;
-    const maxW = Math.max(...arr.map(i => this.cache[i].naturalWidth || 0));
-    const maxH = Math.max(...arr.map(i => this.cache[i].naturalHeight || 0));
+    const maxW = Math.max(...arr.map(i => (this.cache[i]?.naturalWidth) || 0));
+    const maxH = Math.max(...arr.map(i => (this.cache[i]?.naturalHeight) || 0));
     const canvas = document.createElement('canvas');
     canvas.width = maxW; canvas.height = maxH;
     const ctx = canvas.getContext('2d');
     if (arr.length === 1) {
       const layer = this.cache[arr[0]];
-      ctx.drawImage(layer, 0, 0, layer.naturalWidth, layer.naturalHeight);
+      if (layer) ctx.drawImage(layer, 0, 0, layer.naturalWidth, layer.naturalHeight);
       return canvas;
     }
     const fps = 1000 / arr.length;
@@ -68,7 +69,7 @@ export class P {
       last = now;
       ctx.clearRect(0, 0, maxW, maxH);
       const layer = this.cache[arr[i]];
-      ctx.drawImage(layer, 0, 0, layer.naturalWidth, layer.naturalHeight);
+      if (layer) ctx.drawImage(layer, 0, 0, layer.naturalWidth, layer.naturalHeight);
       i = (i + 1) % arr.length;
       };
     requestAnimationFrame(animate);
@@ -104,6 +105,7 @@ export class P {
     if (this.obj.item.length !== this.obj.draw.length) return canvas;
     for (const [k, v] of this.obj.draw.entries()) {
       const layer = this._renderItemLayer(this.obj.item[k]);
+      if (!layer) continue;
       const pixelX = this.c.l + v.x;
       const pixelY = this.c.u + v.y;
       ctx.drawImage(layer, pixelX, pixelY, layer.width, layer.height);
