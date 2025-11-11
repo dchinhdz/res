@@ -3,7 +3,7 @@ export class P {
     this.cache = {};
     this.layer = [];
     this.obj = {item: [], draw: [], root: 0};
-    this.c = {rW:0,rH:0,mW:0,mH:0,u:[],d:[],l:[],r:[]};
+    this.c = {rW:0,rH:0,mW:0,mH:0,u:0,d:0,l:0,r:0};
   }
   async run() {
     this._data();
@@ -83,14 +83,14 @@ export class P {
         this.c.mH = Math.max(this.c.mH, this.cache[i].naturalHeight);
         // tính toán phần dư
         const {x, y} = this.obj.draw[k];
-        if (y < 0) this.c.u.push(-y);
-        if (y > 0) this.c.d.push(y);
-        if (x < 0) this.c.l.push(-x);
-        if (x > 0) this.c.r.push(x);
+        if (y < 0) this.c.u = Math.max(this.c.u, -y);
+        if (y > 0) this.c.d = Math.max(this.c.d, y);
+        if (x < 0) this.c.l = Math.max(this.c.l, -x);
+        if (x > 0) this.c.r = Math.max(this.c.r, x);
       });
     });
-    this.c.mW = Math.max(this.c.mW, (this.c.rW + Math.max(0,...this.c.l) + Math.max(0,...this.c.r)));
-    this.c.mH = Math.max(this.c.mH, (this.c.rH + Math.max(0,...this.c.u) + Math.max(0,...this.c.d)));
+    this.c.mW = Math.max(this.c.mW, (this.c.rW + this.c.l + this.c.r));
+    this.c.mH = Math.max(this.c.mH, (this.c.rH + this.c.u + this.c.d));
   }
   _main() {
     if (!this.obj.root || !this.obj.item.length || !this.obj.draw.length ||  !Object.keys(this.cache).length) return;
