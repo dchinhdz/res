@@ -16,13 +16,13 @@ export class P {
     }
   }
   static addPlayer(d) {
-    if (!this.ready || !d || !d.info || d.info.userId == null) return null;
+    if (!this.ready || !d?.info?.userId) return null;
     const e = this.data.player.some((p) => p.info && p.info.userId === d.info.userId);
     if (!e) this.data.player.push(d);
     this.start(this.data);//restart
   }
   static updatePlayer(d) {
-    if (!this.ready || !d || !d.info || d.info.userId == null) return null;
+    if (!this.ready || !d?.info?.userId) return null;
     const u = d.info.userId;
     for (let i=0;i<this.data.player.length;i++) {
       let p = this.data.player[i];
@@ -44,7 +44,7 @@ export class P {
   }
   static removePlayer(userId) {
     if (!this.ready) return null;
-    this.data.player = this.data.player.filter((p) => !(p.info && p.info.userId === userId);
+    this.data.player = this.data.player.filter((p) => !(p.info && p.info.userId === userId));
     this.start(this.data);
   }
   //Phần xử lý canvas
@@ -56,7 +56,7 @@ export class P {
     const g = [];
     this.data.player.forEach(p => {
       (p.draw || []).forEach(d => {
-        if (!d || !Array.isArray(d.layer)) return null;
+        if (!d || !Array.isArray(d.layer)) return;
         (d.layer || []).forEach(i => {
           if ((typeof i === "string" || typeof i === "number") && !this.cache[i]) g.push(i);
         });
@@ -70,6 +70,7 @@ export class P {
     return l.filter(Boolean);
   }
   f(i) {
+    if (i == null) return Promise.resolve(null);
     return new Promise(r => {
       const k = new Image();
       k.src = `/img/item/hd/${i}.png`;
