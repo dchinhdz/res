@@ -4,7 +4,8 @@ export class P {
   static cacheItem = {};
   static ready = false;
   static async start(d) {
-    if (!d || !d.map || !d.player) return this.data;
+    if (!d || !d.map || !d.player) return this.canvas;
+    if (!Object.keys(d.map).length || !Array.isArray(d.player)) return this.canvas;
     try {
       this.data = d;
       await this.loadCacheItem();
@@ -39,7 +40,9 @@ export class P {
       move: d.move || [0, 0]
     });
   }
-  static removePlayer() {
+  static removePlayer(userId) {
+    if (!this.ready) return null;
+    this.data.player = this.data.player.filter((p) => !(p.info && p.info.userId === userId);
   }
   //Phần xử lý canvas
   drawCanvas() {
