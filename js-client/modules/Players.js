@@ -16,14 +16,14 @@ export class P {
   }
 
   static addPlayer(p) {
-    if (!this.ready || !p?.info?.userId) return null;
-    if (this.data.player.some(x => x.info?.userId === p.info.userId)) return null;
+    if (!this.ready || !p?.info?.userId) return;
+    if (this.data.player.some(x => x.info?.userId === p.info.userId)) return;
     this.data.player.push(structuredClone(p));
     return this.start(this.data);
   }
 
   static updatePlayer(p) {
-    if (!this.ready || !p?.info?.userId) return null;
+    if (!this.ready || !p?.info?.userId) return;
     const id = p.info.userId;
     const idx = this.data.player.findIndex(x => x.info?.userId === id);
     if (idx === -1) {
@@ -39,7 +39,7 @@ export class P {
   }
 
   static removePlayer(userId) {
-    if (!this.ready || !userId) return null;
+    if (!this.ready || !userId) return;
     this.data.player = this.data.player.filter(p => p.info?.userId !== userId);
     return this.start(this.data);
   }
